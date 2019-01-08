@@ -1,5 +1,9 @@
 version: 2.1
 
+description: |
+    A sample CircleCI config file that uses the ryanshoover/wpengine orb
+    to test a site repo at every stage and deploy the site to WP Engine environments.
+
 orbs:
     wpengine: ryanshoover/wpengine@volatile
 
