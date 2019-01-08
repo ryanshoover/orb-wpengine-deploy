@@ -1,0 +1,53 @@
+version: 2.1
+
+orbs:
+    wpengine: ryanshoover/wpengine@volatile
+
+workflows:
+    version: 2
+
+    build_test_deploy:
+        jobs:
+            - wpengine/lint
+            - wpengine/codeception
+
+            - wpengine/build_deploy:
+                name:         deploy-development
+                environment:  development
+                requires:
+                    - wpengine/lint
+                    - wpengine/codeception
+                filters:
+                    branches:
+                        only: development
+
+            - wpengine/build_deploy:
+                name:         deploy-staging
+                environment:  staging
+                requires:
+                    - wpengine/lint
+                    - wpengine/codeception
+                filters:
+                    branches:
+                        only: staging
+
+            - wpengine/build_deploy:
+                name:         deploy-production
+                environment:  production
+                requires:
+                    - wpengine/lint
+                    - wpengine/codeception
+                filters:
+                    branches:
+                        only:
+                            - master
+                            - production
+
+    visual_regression:
+        jobs:
+            - wpengine/backstop:
+                config: gulpfile.babel.js/backstop/backstop.js
+                filters:
+                    branches:
+                        only:
+                            - staging
