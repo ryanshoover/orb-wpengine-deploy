@@ -96,7 +96,7 @@ workflows:
     visual_regression:
         jobs:
             - wpengine/backstop:
-				config: backstop.js
+                config: backstop.js
                 filters:
                     branches:
                         only:
