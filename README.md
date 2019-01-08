@@ -2,6 +2,46 @@
 
 This is an orb that can be used in your CircleCI workflows. With it you can test WordPress site repos and deploy to WP Engine environments.
 
+## Available Options
+
+### Executors
+
+`base`
+
+A basic PHP 7.2 container with node and browsers included.
+
+`wp-browser`
+
+A custom container that supports codeception testing. The container is based on the [ryanshoover/wp-browser](https://github.com/ryanshoover/docker-wp-browser) image.
+
+`backstop`
+
+A container based on the backstop Docker image.
+
+### Commands
+
+`install`
+
+General setup command. Handles cache, git checkout, composer install, and yarn install.
+
+### Jobs
+
+`lint`
+
+Lint the files to make sure everything follows best practices. `yarn run lint` can be a combination of phpcs, jslint, sass-lint, and more
+
+`codeception`
+
+Run codeception tests for end-to-end testing. Codeception supports unit, wpunit functional, and acceptance testing.
+
+`backstop`
+
+Run visual regression tests using backstopjs
+
+`build_deploy`
+
+Build and deploy the codebase to a WP Engine environment
+
 ## Sample CircleCI Config
 
 This is a sample setup for deploying to a WP Engine site.
@@ -63,6 +103,8 @@ workflows:
 ```
 
 Environment Variables
+
+I suggest you define your environment variables in your Project Settings. See [CircleCI documentation](https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project) on the many ways to define environment variables.
 
 * The WPE Environment variables are required for deployments. These should match your WP Engine site environment names.
 * The [Rollbar access token](https://docs.rollbar.com/reference#section-authentication) allows you to notify rollbar about the deploy process

@@ -143,7 +143,7 @@ jobs:
                 path:         test-results
 
     build_deploy:
-        description:          Build and deploy our code
+        description:          Build and deploy the codebase to a WP Engine environment
         parameters:
             environment:
                 description:  |
