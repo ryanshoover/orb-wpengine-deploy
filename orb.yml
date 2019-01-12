@@ -69,6 +69,11 @@ commands:
                 command:      |
                     <<# exclude-composer >> exit 0 <</ exclude-composer >>
                     composer install <<# production >> --no-dev <</ production >> --no-ansi --no-interaction --optimize-autoloader --no-progress --prefer-dist
+            - run:
+                name:         Install Dependencies' Node Dependencies
+                command:      |
+                    <<# exclude-yarn >> exit 0 <</ exclude-yarn >>
+                    find . -regextype awk -regex "\./wp-content/(mu-plugins|plugins|themes)/(studiopress|wpengine)-[^/]*/package.json" | sed 's|/[^/]+$||' | xargs -tI % yarn --cwd % install
             - save_cache:
                 paths:
                     - ./node_modules
@@ -166,6 +171,9 @@ jobs:
             - run:
                 name:         Build compiled files
                 command:      yarn run build
+            - run:
+                name:         Build dependencies' compiled files
+                command:      find . -regextype awk -regex "\./wp-content/(mu-plugins|plugins|themes)/(studiopress|wpengine)-[^/]*/package.json" | sed 's|/[^/]+$||' | xargs -tI % yarn --cwd % run build
 
             # Add the git.wpengine.com fingerprint to our known hosts
             # We need to interact with this server. And the unknown host will trigger an interactive prompt.
