@@ -60,20 +60,37 @@ commands:
                     - << cache-name >>-dependencies-{{ checksum "package.json" }}-{{ checksum "composer.json" }}
                     - << cache-name >>-dependencies-
             - run:
-                name:         Install Node Dependencies
-                command:      |
-                    <<# exclude-yarn >> exit 0 <</ exclude-yarn >>
-                    yarn install <<# production >> --production <</ production >> --emoji false --no-progress --non-interactive
-            - run:
-                name:         Install Composer Dependencies
+                name:         Install composer dependencies
                 command:      |
                     <<# exclude-composer >> exit 0 <</ exclude-composer >>
                     composer install <<# production >> --no-dev <</ production >> --no-ansi --no-interaction --optimize-autoloader --no-progress --prefer-dist
             - run:
-                name:         Install Dependencies' Node Dependencies
+                name:         Install node dependencies
                 command:      |
                     <<# exclude-yarn >> exit 0 <</ exclude-yarn >>
-                    find . -regextype awk -regex "\./wp-content/(mu-plugins|plugins|themes)/(studiopress|wpengine)-[^/]*/package.json" | sed 's|/[^/]+$||' | xargs -tI % yarn --cwd % install
+                    yarn install <<# production >> --production <</ production >> --emoji false --no-progress --non-interactive
+            - run:
+                name:         Find composer and package in plugins & themes
+                command:      |
+                              echo 'export COMPOSER_DIRS=$(find . -regextype awk -regex "\./wp-content/(mu-plugins|plugins|themes)/(studiopress|wpengine)-[^/]*/composer.json" | sed "s|/[^/]*$||")' >> $BASH_ENV
+                              echo 'export PACKAGE_DIRS=$(find . -regextype awk -regex "\./wp-content/(mu-plugins|plugins|themes)/(studiopress|wpengine)-[^/]*/package.json" | sed "s|/[^/]*$||")' >> $BASH_ENV
+                              source $BASH_ENV
+            - run:
+                name:         Install plugin and theme composer dependencies
+                command:      |
+                              <<# exclude-composer >> exit 0 <</ exclude-composer >>
+                              for COMPOSER_DIR in $COMPOSER_DIRS
+                              do
+                                  composer install --working-dir $COMPOSER_DIR <<# production >> --no-dev <</ production >> --no-ansi --no-interaction --optimize-autoloader --no-progress --prefer-dist
+                              done
+            - run:
+                name:         Install plugin and theme node dependencies
+                command:      |
+                              <<# exclude-yarn >> exit 0 <</ exclude-yarn >>
+                              for PACKAGE_DIR in $PACKAGE_DIRS
+                              do
+                                yarn --cwd $PACKAGE_DIR install <<# production >> --production <</ production >> --emoji false --no-progress --non-interactive
+                              done
             - save_cache:
                 paths:
                     - ./node_modules
@@ -172,8 +189,15 @@ jobs:
                 name:         Build compiled files
                 command:      yarn run build
             - run:
-                name:         Build dependencies' compiled files
-                command:      find . -regextype awk -regex "\./wp-content/(mu-plugins|plugins|themes)/(studiopress|wpengine)-[^/]*/package.json" | sed 's|/[^/]+$||' | xargs -tI % yarn --cwd % run build
+                name:         Build plugin and theme compiled files
+                command:      |
+                              for PACKAGE_DIR in $PACKAGE_DIRS
+                              do
+                                if yarn --cwd $PACKAGE_DIR run --non-interactive | grep -e "- build"
+                                then
+                                    yarn --cwd $PACKAGE_DIR run build
+                                fi
+                              done
 
             # Add the git.wpengine.com fingerprint to our known hosts
             # We need to interact with this server. And the unknown host will trigger an interactive prompt.
