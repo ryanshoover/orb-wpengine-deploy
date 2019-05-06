@@ -5,7 +5,7 @@ description: |
     and for deploying to WP Engine installs.
 
 orbs:
-    rollbar: rollbar/deploy@1.0.0
+    rollbar: rollbar/deploy@1.0.1
 
 executors:
     base:
