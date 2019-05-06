@@ -57,7 +57,7 @@ commands:
             - checkout
             - restore_cache:
                 keys:
-                    - << parameters.cache-name >>-dependencies-{{ checksum "yarn.lock }}-{{ checksum "composer.lock" }}
+                    - << parameters.cache-name >>-dependencies-{{ checksum "yarn.lock" }}-{{ checksum "composer.lock" }}
                     - << parameters.cache-name >>-dependencies-
             - run:
                 name:         Find composer and package in plugins & themes
@@ -99,7 +99,7 @@ commands:
                 paths:
                     - ./node_modules
                     - ./vendor
-                key:          << parameters.cache-name >>-dependencies-{{ checksum "yarn.lock }}-{{ checksum "composer.lock" }}
+                key:          << parameters.cache-name >>-dependencies-{{ checksum "yarn.lock" }}-{{ checksum "composer.lock" }}
 
 jobs:
     lint:
