@@ -1,0 +1,68 @@
+# Ignore everything in the root except the "wp-content"
+/*
+!/.git/
+!/wp-content/
+
+# Ignore everything in the "wp-content" directory,
+# except "plugins", "mu-plugins", and "themes" directories.
+/wp-content/*
+!/wp-content/mu-plugins/
+!/wp-content/plugins/
+!/wp-content/themes/
+
+# Ignore dev plugins and known problematic plugins.
+/wp-content/mu-plugins/S3-Uploads*
+/wp-content/plugins/S3-Uploads*
+/wp-content/mu-plugins/debug-*
+/wp-content/plugins/debug-*
+/wp-content/mu-plugins/log-deprecated-notices
+/wp-content/plugins/log-deprecated-notices
+/wp-content/mu-plugins/query-monitor
+/wp-content/plugins/query-monitor
+/wp-content/mu-plugins/rewrite-rules-inspector
+/wp-content/plugins/rewrite-rules-inspector
+/wp-content/mu-plugins/user-switching
+/wp-content/plugins/user-switching
+
+# Don't ignore site manifest files
+!apple-touch-icon*
+!favicon.ico
+!*.webmanifest
+
+# Dev files
+*.codekit
+.babel*
+.browserslist*
+.editorconfig
+.eslint*
+.postcss*
+.sass-cache
+.stylelint*
+.svn
+gulpfile*
+
+# Known large file types
+*.sql
+*.hqx
+*.bin
+*.exe
+*.dll
+*.deb
+*.dmg
+*.iso
+*.img
+*.msi
+*.msp
+*.msm
+*.mid
+*.midi
+*.kar
+*.mng
+*.asx
+*.asf
+*.wmv
+*.zip
+*.tar
+*.tgz
+*.gz
+*.mp4
