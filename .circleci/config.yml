@@ -5,7 +5,7 @@ description: |
     to test a site repo at every stage and deploy the site to WP Engine environments.
 
 orbs:
-    wpengine: ryanshoover/wpengine@volatile
+    wpengine: ryanshoover/wpengine@0.2.4
 
 workflows:
     version: 2
@@ -47,10 +47,10 @@ workflows:
                             - master
                             - production
 
-    visual_regression:
+    regression:
         jobs:
             - wpengine/backstop:
-                config: gulpfile.babel.js/backstop/backstop.js
+                config: tests/_backstop/index.js
                 filters:
                     branches:
                         only:
