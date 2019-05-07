@@ -49,8 +49,10 @@ This is a sample setup for deploying to a WP Engine site.
 `.circleci/config.yml`
 
 ```yml
+version: 2.1
+
 orbs:
-    wpengine: ryanshoover/wpengine@volatile
+    wpengine: ryanshoover/wpengine@0.2.4
 
 workflows:
     version: 2
@@ -69,7 +71,6 @@ workflows:
                 filters:
                     branches:
                         only: development
-
 
             - wpengine/build_deploy:
                 name:         deploy-staging
@@ -93,14 +94,15 @@ workflows:
                             - master
                             - production
 
-    visual_regression:
+    regression:
         jobs:
             - wpengine/backstop:
-                config: backstop.js
+                config: tests/_backstop/index.js
                 filters:
                     branches:
                         only:
                             - staging
+
 ```
 
 Environment Variables
