@@ -12,6 +12,7 @@ executors:
         docker:
             - image:          circleci/php:7-apache-node-browsers-legacy
     wp-browser:
+        working_directory:    /var/www/html
         docker:
             # TODO: Switch to tagged version when stable
             - image:          ryanshoover/wp-browser:latest
