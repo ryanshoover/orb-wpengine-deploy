@@ -112,8 +112,8 @@ jobs:
             - install:
                 production:         false
                 cache-name:         yarn
-                include-composer: false
-                include-yarn:     true
+                include-composer:   true
+                include-yarn:       true
             - run:
                 name:               Run lint command
                 command:            yarn run lint
