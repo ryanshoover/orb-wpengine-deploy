@@ -173,15 +173,11 @@ jobs:
         parameters:
             environment:
                 description:        |
-                                    Are we deploying to the production, staging, or development environment?
-                                    Each of these environments needs a corresponding environment variable defined
+                                    Are we deploying to the production, staging, development, or custom environment?
+                                    Production, staging, and development need a corresponding environment variable defined
                                     in CircleCI's project configuration. An optional `./.gitignores/__deployment`
                                     file can be used to deploy build files rather than source files.
-                type:               enum
-                enum:
-                    - production
-                    - staging
-                    - development
+                type:               string
         executor:                   base
         steps:
             - install:
@@ -216,12 +212,22 @@ jobs:
             - run:
                 name:         Set up the WPE install name
                 command:      |
-                              echo 'export WPE_INSTALL=$( \
-                                  case << parameters.environment >> in \
-                                      production)  echo $WPE_PRODUCTION_INSTALL;; \
-                                      staging)     echo $WPE_STAGING_INSTALL;; \
-                                      development) echo $WPE_DEVELOPMENT_INSTALL;; \
-                                  esac )' >> $BASH_ENV
+                              echo 'export WPE_INSTALL=$(
+                                  case << parameters.environment >> in
+                                      production)
+                                          echo $WPE_PRODUCTION_INSTALL
+                                          ;;
+                                      staging)
+                                          echo $WPE_STAGING_INSTALL
+                                          ;;
+                                      development)
+                                          echo $WPE_DEVELOPMENT_INSTALL
+                                          ;;
+                                      *)
+                                          echo << parameters.environment >>
+                                          ;;
+                                  esac
+                              )' >> $BASH_ENV
                               source $BASH_ENV
 
             # Set up the git remotes for WP Engine

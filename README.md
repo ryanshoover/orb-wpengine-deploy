@@ -44,74 +44,15 @@ Build and deploy the codebase to a WP Engine environment
 
 ## Sample CircleCI Config
 
-This is a sample setup for deploying to a WP Engine site.
+See the [sample circleci config file](.circleci/config.yml) for a copy-paste solution to get you up and running.
 
-`.circleci/config.yml`
-
-```yml
-version: 2.1
-
-orbs:
-    wpengine: ryanshoover/wpengine@0.2.4
-
-workflows:
-    version: 2
-
-    build_test_deploy:
-        jobs:
-            - wpengine/lint
-            - wpengine/codeception
-
-            - wpengine/build_deploy:
-                name:         deploy-development
-                environment:  development
-                requires:
-                    - wpengine/lint
-                    - wpengine/codeception
-                filters:
-                    branches:
-                        only: development
-
-            - wpengine/build_deploy:
-                name:         deploy-staging
-                environment:  staging
-                requires:
-                    - wpengine/lint
-                    - wpengine/codeception
-                filters:
-                    branches:
-                        only: staging
-
-            - wpengine/build_deploy:
-                name:         deploy-production
-                environment:  production
-                requires:
-                    - wpengine/lint
-                    - wpengine/codeception
-                filters:
-                    branches:
-                        only:
-                            - master
-                            - production
-
-    regression:
-        jobs:
-            - wpengine/backstop:
-                config: tests/_backstop/index.js
-                filters:
-                    branches:
-                        only:
-                            - staging
-
-```
-
-Environment Variables
+## Environment Variables
 
 I suggest you define your environment variables in your Project Settings. See [CircleCI documentation](https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project) on the many ways to define environment variables.
 
-* The WPE Environment variables are required for deployments. These should match your WP Engine site environment names.
-* The [Rollbar access token](https://docs.rollbar.com/reference#section-authentication) allows you to notify rollbar about the deploy process
-* The Composer Auth variable allows you to install private GitHub repositories with your personal [GitHub token](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/).
+* WPE Environment variables are required for deployments. These should match your WP Engine site environment names.
+* A [Rollbar access token](https://docs.rollbar.com/reference#section-authentication) allows you to notify rollbar about the deploy process
+* A Composer Auth variable allows you to install private GitHub repositories with your personal [GitHub token](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/).
 
 ```bash
 WPE_PRODUCTION_ENVIRONMENT=mysite
