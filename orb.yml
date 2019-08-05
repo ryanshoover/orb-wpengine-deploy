@@ -85,6 +85,12 @@ commands:
                 condition:    << parameters.include-yarn >>
                 steps:
                     - run:
+                        name:         Add Gemfury registry
+                        command:      npm config set @dxt:registry https://npm.fury.io/wpedxt/
+                    - run:
+                        name:         Add authentication to Gemfury
+                        command:      echo "//npm.fury.io/wpedxt/:_authToken=${FURY_AUTH}" > .npmrc
+                    - run:
                         name:         Install node dependencies
                         command:      |
                             yarn install <<# parameters.production >> --production <</ parameters.production >> --emoji false --no-progress --non-interactive
