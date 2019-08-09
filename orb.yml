@@ -193,7 +193,11 @@ jobs:
                 include-yarn:     true
             - run:
                 name:         Build compiled files
-                command:      yarn run build
+                command:      |
+                              if yarn run --non-interactive | grep -e "- build"
+                              then
+                                  yarn run build
+                              fi
             - run:
                 name:         Build plugin and theme compiled files
                 command:      |
