@@ -115,12 +115,23 @@ jobs:
         steps:
             - install:
                 production:         false
-                cache-name:         yarn
+                cache-name:         lint
                 include-composer:   true
                 include-yarn:       true
             - run:
-                name:               Run lint command
-                command:            yarn run lint
+                name:               Run composer lint
+                command:            |
+                                    if [[ -f composer.json && $(composer run --list | grep "\blint\b") ]]
+                                    then
+                                        composer run lint
+                                    fi
+            - run:
+                name:               Run yarn lint
+                command:            |
+                                    if [[ -f package.json && $(yarn run | grep "\blint\b") ]]
+                                    then
+                                        yarn run lint
+                                    fi
 
     codeception:
         description:                |
