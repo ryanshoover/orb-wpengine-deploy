@@ -122,9 +122,39 @@ jobs:
                 name:               Run lint command
                 command:            yarn run lint
 
+    codeception:
+        description:                |
+                                    Run codeception tests for end-to-end testing on a WordPress site.
+                                    Codeception supports unit, wpunit, functional, and acceptance testing.
+                                    This job is based on the Docker image managed at https://github.com/ryanshoover/docker-wp-browser
+        executor:                   wp-browser
+        steps:
+            - run:
+                name:               Make sure WordPress is loaded
+                command:            /entrypoint.sh
+            - install:
+                production:         false
+                cache-name:         wp-browser
+                include-composer:   true
+                include-yarn:       false
+            - run:
+                name:               Run Codeception acceptance tests
+                command:            codecept run acceptance --xml="$CIRCLE_WORKING_DIRECTORY/test-results/acceptance/results.xml"
+            - run:
+                name:               Run Codeception functional tests
+                command:            codecept run functional --xml="$CIRCLE_WORKING_DIRECTORY/test-results/functional/results.xml"
+            - run:
+                name:               Run Codeception unit tests
+                command:            codecept run unit --xml="$CIRCLE_WORKING_DIRECTORY/test-results/unit/results.xml"
+            - run:
+                name:               Run Codeception wpunit tests
+                command:            codecept run wpunit --xml="$CIRCLE_WORKING_DIRECTORY/test-results/wpunit/results.xml"
+            - store_test_results:
+                path:               test-results
+
     packageCodeception:
         description:                |
-                                    Run codeception tests for end-to-end testing.
+                                    Run codeception tests for end-to-end testing on a plugin or theme.
                                     Codeception supports unit, wpunit, functional, and acceptance testing.
                                     This job is based on the Docker image managed at https://github.com/ryanshoover/docker-wp-browser
         parameters:
@@ -163,36 +193,6 @@ jobs:
                                     mv /var/www/config/<< parameters.package_type >>/<< parameters.package_name >>/vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
                                     mv /var/www/config/<< parameters.package_type >>/<< parameters.package_name >>/vendor/wpengine/dxt-tester/lib/codeception.yml $CIRCLE_WORKING_DIRECTORY
                                     mv /var/www/config/<< parameters.package_type >>/<< parameters.package_name >>/tests $CIRCLE_WORKING_DIRECTORY
-            - run:
-                name:               Run Codeception acceptance tests
-                command:            codecept run acceptance --xml="$CIRCLE_WORKING_DIRECTORY/test-results/acceptance/results.xml"
-            - run:
-                name:               Run Codeception functional tests
-                command:            codecept run functional --xml="$CIRCLE_WORKING_DIRECTORY/test-results/functional/results.xml"
-            - run:
-                name:               Run Codeception unit tests
-                command:            codecept run unit --xml="$CIRCLE_WORKING_DIRECTORY/test-results/unit/results.xml"
-            - run:
-                name:               Run Codeception wpunit tests
-                command:            codecept run wpunit --xml="$CIRCLE_WORKING_DIRECTORY/test-results/wpunit/results.xml"
-            - store_test_results:
-                path:               test-results
-
-    codeception:
-        description:                |
-                                    Run codeception tests for end-to-end testing.
-                                    Codeception supports unit, wpunit, functional, and acceptance testing.
-                                    This job is based on the Docker image managed at https://github.com/ryanshoover/docker-wp-browser
-        executor:                   wp-browser
-        steps:
-            - run:
-                name:               Make sure WordPress is loaded
-                command:            /entrypoint.sh
-            - install:
-                production:         false
-                cache-name:         wp-browser
-                include-composer:   true
-                include-yarn:       false
             - run:
                 name:               Run Codeception acceptance tests
                 command:            codecept run acceptance --xml="$CIRCLE_WORKING_DIRECTORY/test-results/acceptance/results.xml"

@@ -34,6 +34,10 @@ Lint the files to make sure everything follows best practices. `yarn run lint` c
 
 Run codeception tests for end-to-end testing. Codeception supports unit, wpunit functional, and acceptance testing.
 
+`packageCodeception`
+
+Run codeception tests on plugins and themes. Codeception supports unit, wpunit functional, and acceptance testing.
+
 `backstop`
 
 Run visual regression tests using backstopjs
@@ -44,7 +48,7 @@ Build and deploy the codebase to a WP Engine environment
 
 ## Sample CircleCI Config
 
-See the [sample circleci config file](.circleci/config.yml) for a copy-paste solution to get you up and running.
+See the [sample circleci config file](example_circleci/config.yml) for a copy-paste solution to get you up and running.
 
 ## Environment Variables
 

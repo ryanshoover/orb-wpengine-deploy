@@ -1,68 +1,60 @@
 version: 2.1
 
-description: |
-    A sample CircleCI config file that uses the ryanshoover/wpengine orb
-    to test a site repo at every stage and deploy the site to WP Engine environments.
-
 orbs:
-    wpengine: ryanshoover/wpengine@0.3
+    orb-tools: circleci/orb-tools@8
 
 workflows:
-    version: 2
-
-    build_test_deploy:
+    integration-tests_prod-release:
         jobs:
-            - wpengine/lint
-            - wpengine/codeception
+            - orb-tools/dev-promote-prod:
+                  filters:
+                      branches:
+                          ignore: /.*/
+                      tags:
+                          only: /master-patch.*/
+                  name: dev-promote-patch
+                  orb-name: ryanshoover/wpengine
+            - orb-tools/dev-promote-prod:
+                  filters:
+                      branches:
+                          ignore: /.*/
+                      tags:
+                          only: /master-minor.*/
+                  name: dev-promote-minor
+                  orb-name: ryanshoover/wpengine
+                  release: minor
+            - orb-tools/dev-promote-prod:
+                  filters:
+                      branches:
+                          ignore: /.*/
+                      tags:
+                          only: /master-major.*/
+                  name: dev-promote-major
+                  orb-name: ryanshoover/wpengine
+                  release: major
 
-            - wpengine/build_deploy:
-                name:         deploy-development
-                environment:  development
-                requires:
-                    - wpengine/lint
-                    - wpengine/codeception
-                filters:
-                    branches:
-                        only: development
-
-            - wpengine/build_deploy:
-                name:         deploy-staging
-                environment:  staging
-                requires:
-                    - wpengine/lint
-                    - wpengine/codeception
-                filters:
-                    branches:
-                        only: staging
-
-            - wpengine/build_deploy:
-                name:         deploy-production
-                environment:  production
-                requires:
-                    - wpengine/lint
-                    - wpengine/codeception
-                filters:
-                    branches:
-                        only:
-                            - master
-                            - production
-            - wpengine/build_deploy:
-                name:         deploy-feature
-                environment:  thenameofmyfeatureinstall
-                requires:
-                    - wpengine/lint
-                    - wpengine/codeception
-                filters:
-                    branches:
-                        only:
-                            - /feat-.*/
-
-
-    regression:
+    lint_pack-validate_publish-dev:
         jobs:
-            - wpengine/backstop:
-                config: tests/_backstop/index.js
-                filters:
-                    branches:
-                        only:
-                            - staging
+            - orb-tools/lint
+            - orb-tools/pack:
+                  requires:
+                      - orb-tools/lint
+            - orb-tools/publish-dev:
+                  orb-name: ryanshoover/wpengine
+                  requires:
+                      - orb-tools/pack
+            - orb-tools/trigger-integration-workflow:
+                  filters:
+                      branches:
+                          ignore: master
+                  name: trigger-integration-dev
+                  requires:
+                      - orb-tools/publish-dev
+            - orb-tools/trigger-integration-workflow:
+                  filters:
+                      branches:
+                          only: master
+                  name: trigger-integration-master
+                  requires:
+                      - orb-tools/publish-dev
+                  tag: master
