@@ -5,24 +5,24 @@ description: |
     and for deploying to WP Engine installs.
 
 orbs:
-    rollbar: rollbar/deploy@1.0.1
+    rollbar:                        rollbar/deploy@1.0.1
 
 executors:
     base:
         docker:
-            - image:          circleci/php:7-apache-node-browsers-legacy
+            - image:                circleci/php:7-apache-node-browsers-legacy
     wp-browser:
-        working_directory:    /var/www/html
+        working_directory:          /var/www/html
         docker:
             # TODO: Switch to tagged version when stable
-            - image:          ryanshoover/wp-browser:latest
+            - image:                ryanshoover/wp-browser:latest
               environment:
-                DB_USER:      wordpress
-                DB_PASSWORD:  wordpress
-                DB_NAME:      wordpress
-                DB_HOST:      db
-            - image:          circleci/mysql:5
-              name:           db
+                DB_USER:            wordpress
+                DB_PASSWORD:        wordpress
+                DB_NAME:            wordpress
+                DB_HOST:            db
+            - image:                circleci/mysql:5
+              name:                 db
               environment:
                 MYSQL_ROOT_PASSWORD: password
                 MYSQL_DATABASE:      wordpress
@@ -34,26 +34,26 @@ executors:
 
 commands:
     install:
-        description:          |
-            General setup command. Handles cache, git checkout,
-            composer install, and yarn install.
+        description:                |
+                                    General setup command. Handles cache, git checkout,
+                                    composer install, and yarn install.
         parameters:
             production:
-                description:  Is this a production build?
-                type:         boolean
-                default:      false
+                description:        Is this a production build?
+                type:               boolean
+                default:            false
             cache-name:
-                description:  Specific cache name for different executors
-                type:         string
-                default:      base
+                description:        Specific cache name for different executors
+                type:               string
+                default:            base
             include-composer:
-                description:  Should composer skip dependencies?
-                type:         boolean
-                default:      false
+                description:        Should composer skip dependencies?
+                type:               boolean
+                default:            false
             include-yarn:
-                description:  Should yarn skip dependencies?
-                type:         boolean
-                default:      false
+                description:        Should yarn skip dependencies?
+                type:               boolean
+                default:            false
         steps:
             - checkout
             - restore_cache:
@@ -61,42 +61,40 @@ commands:
                     - << parameters.cache-name >>-dependencies-{{ checksum "yarn.lock" }}-{{ checksum "composer.lock" }}
                     - << parameters.cache-name >>-dependencies-
             - run:
-                name:         Find composer and package in plugins & themes
-                command:      |
-                              echo 'export COMPOSER_DIRS=$(find . -regextype awk -regex "\./wp-content/(mu-plugins|plugins|themes)/(studiopress|wpengine)-[^/]*/composer.json" | sed "s|/[^/]*$||")' >> $BASH_ENV
-                              echo 'export PACKAGE_DIRS=$(find . -regextype awk -regex "\./wp-content/(mu-plugins|plugins|themes)/(studiopress|wpengine)-[^/]*/package.json" | sed "s|/[^/]*$||")' >> $BASH_ENV
-                              source $BASH_ENV
+                name:               Find composer and package in plugins & themes
+                command:            |
+                                    echo 'export COMPOSER_DIRS=$(find . -regextype awk -regex "\./wp-content/(mu-plugins|plugins|themes)/(studiopress|wpengine)-[^/]*/composer.json" | sed "s|/[^/]*$||")' >> $BASH_ENV
+                                    echo 'export PACKAGE_DIRS=$(find . -regextype awk -regex "\./wp-content/(mu-plugins|plugins|themes)/(studiopress|wpengine)-[^/]*/package.json" | sed "s|/[^/]*$||")' >> $BASH_ENV
+                                    source $BASH_ENV
             - when:
-                condition:    << parameters.include-composer >>
+                condition:          << parameters.include-composer >>
                 steps:
                     - run:
-                        name:         Install composer dependencies
-                        command:      |
-                            composer install <<# parameters.production >> --no-dev <</ parameters.production >> --no-ansi --no-interaction --optimize-autoloader --no-progress --prefer-dist
+                        name:       Install composer dependencies
+                        command:    composer install <<# parameters.production >> --no-dev <</ parameters.production >> --no-ansi --no-interaction --optimize-autoloader --no-progress --prefer-dist
                     - run:
-                        name:         Install plugin and theme composer dependencies
-                        command:      |
+                        name:       Install plugin and theme composer dependencies
+                        command:    |
                                     for COMPOSER_DIR in $COMPOSER_DIRS
                                     do
                                         echo "Installing in $COMPOSER_DIR"
                                         composer install --working-dir $COMPOSER_DIR <<# parameters.production >> --no-dev <</ parameters.production >> --no-ansi --no-interaction --optimize-autoloader --no-progress --prefer-dist
                                     done
             - when:
-                condition:    << parameters.include-yarn >>
+                condition:          << parameters.include-yarn >>
                 steps:
                     - run:
-                        name:         Add Gemfury registry
-                        command:      npm config set @dxt:registry https://npm.fury.io/wpedxt/
+                        name:       Add Gemfury registry
+                        command:    npm config set @dxt:registry https://npm.fury.io/wpedxt/
                     - run:
-                        name:         Add authentication to Gemfury
-                        command:      echo "//npm.fury.io/wpedxt/:_authToken=${FURY_AUTH}" > .npmrc
+                        name:       Add authentication to Gemfury
+                        command:    echo "//npm.fury.io/wpedxt/:_authToken=${FURY_AUTH}" > .npmrc
                     - run:
-                        name:         Install node dependencies
-                        command:      |
-                            yarn install <<# parameters.production >> --production <</ parameters.production >> --emoji false --no-progress --non-interactive
+                        name:       Install node dependencies
+                        command:    yarn install <<# parameters.production >> --production <</ parameters.production >> --emoji false --no-progress --non-interactive
                     - run:
-                        name:         Install plugin and theme node dependencies
-                        command:      |
+                        name:       Install plugin and theme node dependencies
+                        command:    |
                                     for PACKAGE_DIR in $PACKAGE_DIRS
                                     do
                                         echo "Installing in $PACKAGE_DIR"
@@ -106,7 +104,7 @@ commands:
                 paths:
                     - ./node_modules
                     - ./vendor
-                key:          << parameters.cache-name >>-dependencies-{{ checksum "yarn.lock" }}-{{ checksum "composer.lock" }}
+                key:                << parameters.cache-name >>-dependencies-{{ checksum "yarn.lock" }}-{{ checksum "composer.lock" }}
 
 jobs:
     lint:
@@ -124,6 +122,62 @@ jobs:
                 name:               Run lint command
                 command:            yarn run lint
 
+    packageCodeception:
+        description:                |
+                                    Run codeception tests for end-to-end testing.
+                                    Codeception supports unit, wpunit, functional, and acceptance testing.
+                                    This job is based on the Docker image managed at https://github.com/ryanshoover/docker-wp-browser
+        parameters:
+            package_type:
+                description:        Is this a WordPress plugin or theme
+                type:               enum
+                enum:               [ "plugins", "themes" ]
+                default:            plugins
+            package_name:
+                description:        Name of the plugin or theme (directory name)
+                type:               env_var_name
+                default:            CIRCLE_PR_REPONAME
+
+        executor:                   wp-browser
+        steps:
+            - run:
+                name:               Make sure WordPress is loaded
+                command:            /entrypoint.sh
+            - restore_cache:
+                keys:
+                - packageCodeception-dependencies-{{ checksum "composer.lock" }}
+                - packageCodeception-dependencies-
+            - checkout:
+                path:               /var/www/config/<< parameters.package_type >>/<< parameters.package_name >>
+            - run:
+                name:               Install composer dependencies
+                command:            composer install  --no-ansi --no-interaction --optimize-autoloader --no-progress
+                working_directory:  /var/www/config/<< parameters.package_type >>/<< parameters.package_name >>
+            - save_cache:
+                paths:
+                    - /var/www/config/<< parameters.package_type >>/<< parameters.package_name >>/vendor
+                key:                packageCodeception-dependencies-{{ checksum "composer.lock" }}
+            - run:
+                name:               Move test files to working directory
+                command:            |
+                                    mv /var/www/config/<< parameters.package_type >>/<< parameters.package_name >>/vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
+                                    mv /var/www/config/<< parameters.package_type >>/<< parameters.package_name >>/vendor/wpengine/dxt-tester/lib/codeception.yml $CIRCLE_WORKING_DIRECTORY
+                                    mv /var/www/config/<< parameters.package_type >>/<< parameters.package_name >>/tests $CIRCLE_WORKING_DIRECTORY
+            - run:
+                name:               Run Codeception acceptance tests
+                command:            codecept run acceptance --xml="$CIRCLE_WORKING_DIRECTORY/test-results/acceptance/results.xml"
+            - run:
+                name:               Run Codeception functional tests
+                command:            codecept run functional --xml="$CIRCLE_WORKING_DIRECTORY/test-results/functional/results.xml"
+            - run:
+                name:               Run Codeception unit tests
+                command:            codecept run unit --xml="$CIRCLE_WORKING_DIRECTORY/test-results/unit/results.xml"
+            - run:
+                name:               Run Codeception wpunit tests
+                command:            codecept run wpunit --xml="$CIRCLE_WORKING_DIRECTORY/test-results/wpunit/results.xml"
+            - store_test_results:
+                path:               test-results
+
     codeception:
         description:                |
                                     Run codeception tests for end-to-end testing.
@@ -131,26 +185,26 @@ jobs:
                                     This job is based on the Docker image managed at https://github.com/ryanshoover/docker-wp-browser
         executor:                   wp-browser
         steps:
-            - install:
-                production:         false
-                cache-name:         wp-browser
-                include-composer: true
-                include-yarn:     false
             - run:
                 name:               Make sure WordPress is loaded
                 command:            /entrypoint.sh
+            - install:
+                production:         false
+                cache-name:         wp-browser
+                include-composer:   true
+                include-yarn:       false
             - run:
                 name:               Run Codeception acceptance tests
-                command:            codecept run acceptance --xml="test-results/acceptance/results.xml"
+                command:            codecept run acceptance --xml="$CIRCLE_WORKING_DIRECTORY/test-results/acceptance/results.xml"
             - run:
                 name:               Run Codeception functional tests
-                command:            codecept run functional --xml="test-results/functional/results.xml"
+                command:            codecept run functional --xml="$CIRCLE_WORKING_DIRECTORY/test-results/functional/results.xml"
             - run:
                 name:               Run Codeception unit tests
-                command:            codecept run unit --xml="test-results/unit/results.xml"
+                command:            codecept run unit --xml="$CIRCLE_WORKING_DIRECTORY/test-results/unit/results.xml"
             - run:
                 name:               Run Codeception wpunit tests
-                command:            codecept run wpunit --xml="test-results/wpunit/results.xml"
+                command:            codecept run wpunit --xml="$CIRCLE_WORKING_DIRECTORY/test-results/wpunit/results.xml"
             - store_test_results:
                 path:               test-results
 
@@ -184,112 +238,116 @@ jobs:
                                     in CircleCI's project configuration. An optional `./.gitignores/__deployment`
                                     file can be used to deploy build files rather than source files.
                 type:               string
+            rollbar_token:
+                description:        API token for accessing Rollbar
+                type:               env_var_name
+                default:            ROLLBAR_ACCESS_TOKEN
         executor:                   base
         steps:
             - install:
-                production:       true
-                cache-name:       build
-                include-composer: true
-                include-yarn:     true
+                production:         true
+                cache-name:         build
+                include-composer:   true
+                include-yarn:       true
             - run:
-                name:         Build compiled files
-                command:      |
-                              if yarn run --non-interactive | grep -e "- build"
-                              then
-                                  yarn run build
-                              fi
+                name:               Build compiled files
+                command:            |
+                                    if yarn run --non-interactive | grep -e "- build"
+                                    then
+                                        yarn run build
+                                    fi
             - run:
-                name:         Build plugin and theme compiled files
-                command:      |
-                              for PACKAGE_DIR in $PACKAGE_DIRS
-                              do
-                                if yarn --cwd $PACKAGE_DIR run --non-interactive | grep -e "- build"
-                                then
-                                    echo "Building in $PACKAGE_DIR"
-                                    yarn --cwd $PACKAGE_DIR run build
-                                fi
-                              done
+                name:               Build plugin and theme compiled files
+                command:            |
+                                    for PACKAGE_DIR in $PACKAGE_DIRS
+                                    do
+                                        if yarn --cwd $PACKAGE_DIR run --non-interactive | grep -e "- build"
+                                        then
+                                            echo "Building in $PACKAGE_DIR"
+                                            yarn --cwd $PACKAGE_DIR run build
+                                        fi
+                                    done
 
             # Add the git.wpengine.com fingerprint to our known hosts
             # We need to interact with this server. And the unknown host will trigger an interactive prompt.
             # The workaround is to manually add the fingerprint ourselves.
             # Note:           This will need updated if and when WP Engine updates the fingerprint
             - run:
-                name:         Add deploy host to known_hosts
-                command:      echo 'git.wpengine.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEApRVAUwjz49VKfuENfyv52Dvh3qx9nWW/3Gb7R9pwABXUNQqkipt3aB7w2W6jOaEGFmzSr/4qhstUv0lvbeZu/1uRU/b6WrqULu+9bAdt9ll09QULfMxAIFWDwDS1F6GEZT+Yau/wLUI2VTZppxSVRIPe20/mxgXk8/Q9ha5tCaz+dQZ9lHWwk9rbDF+7LSVomLGM3e9dwr6mS4p37Qkje2cFJBqQcQ+RqEOTOD/xiFU0DH8TWO4R5yibQ0KEZVACkwhaAZSl81F7YZrrLEfsFS/llgpV3YZHQGvFi0x/ELAUJMFE9umdy9EwFF7/lTpV8zOGdiLW+v8svweWJJJ00w==' >> ~/.ssh/known_hosts
+                name:               Add deploy host to known_hosts
+                command:            echo 'git.wpengine.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEApRVAUwjz49VKfuENfyv52Dvh3qx9nWW/3Gb7R9pwABXUNQqkipt3aB7w2W6jOaEGFmzSr/4qhstUv0lvbeZu/1uRU/b6WrqULu+9bAdt9ll09QULfMxAIFWDwDS1F6GEZT+Yau/wLUI2VTZppxSVRIPe20/mxgXk8/Q9ha5tCaz+dQZ9lHWwk9rbDF+7LSVomLGM3e9dwr6mS4p37Qkje2cFJBqQcQ+RqEOTOD/xiFU0DH8TWO4R5yibQ0KEZVACkwhaAZSl81F7YZrrLEfsFS/llgpV3YZHQGvFi0x/ELAUJMFE9umdy9EwFF7/lTpV8zOGdiLW+v8svweWJJJ00w==' >> ~/.ssh/known_hosts
 
             # Set up our WPE_Install based on the environment
             - run:
-                name:         Set up the WPE install name
-                command:      |
-                              echo 'export WPE_INSTALL=$(
-                                  case << parameters.environment >> in
-                                      production)
-                                          echo $WPE_PRODUCTION_INSTALL
-                                          ;;
-                                      staging)
-                                          echo $WPE_STAGING_INSTALL
-                                          ;;
-                                      development)
-                                          echo $WPE_DEVELOPMENT_INSTALL
-                                          ;;
-                                      *)
-                                          echo << parameters.environment >>
-                                          ;;
-                                  esac
-                              )' >> $BASH_ENV
-                              source $BASH_ENV
+                name:               Set up the WPE install name
+                command:            |
+                                    echo 'export WPE_INSTALL=$(
+                                        case << parameters.environment >> in
+                                            production)
+                                                echo $WPE_PRODUCTION_INSTALL
+                                                ;;
+                                            staging)
+                                                echo $WPE_STAGING_INSTALL
+                                                ;;
+                                            development)
+                                                echo $WPE_DEVELOPMENT_INSTALL
+                                                ;;
+                                            *)
+                                                echo << parameters.environment >>
+                                                ;;
+                                        esac
+                                    )' >> $BASH_ENV
+                                    source $BASH_ENV
 
             # Set up the git remotes for WP Engine
             - run:
-                name:         Set up the WP Engine install git remotes
-                command:      |
-                              git config --global user.email "deploy@circleci.local"
-                              git config --global user.name ${CIRCLE_PROJECT_REPONAME}
-                              git remote add wpe git@git.wpengine.com:production/${WPE_INSTALL}.git
-                              git fetch wpe
+                name:               Set up the WP Engine install git remotes
+                command:            |
+                                    git config --global user.email "deploy@circleci.local"
+                                    git config --global user.name ${CIRCLE_PROJECT_REPONAME}
+                                    git remote add wpe git@git.wpengine.com:production/${WPE_INSTALL}.git
+                                    git fetch wpe
 
             # Commit our build version of the code
             - run:
-                name:         Check out a new branch
-                command:      git checkout -b ${CIRCLE_BRANCH}-${CIRCLE_BUILD_NUM}
+                name:               Check out a new branch
+                command:            git checkout -b ${CIRCLE_BRANCH}-${CIRCLE_BUILD_NUM}
             - run:
-                name:         Swap our gitignore files
-                command:      |
-                              if [ -f ./.gitignores/__deployment ]; then
-                                rm -f .gitignore
-                                ln -s ./.gitignores/__deployment .gitignore
-                              else
-                                rm -f .gitignore
-                                wget -nc -O .gitignore https://raw.githubusercontent.com/ryanshoover/orb-wpengine-deploy/master/lib/deploy.gitignore
-                              fi
+                name:               Swap our gitignore files
+                command:            |
+                                    if [ -f ./.gitignores/__deployment ]; then
+                                        rm -f .gitignore
+                                        ln -s ./.gitignores/__deployment .gitignore
+                                    else
+                                        rm -f .gitignore
+                                        wget -nc -O .gitignore https://raw.githubusercontent.com/ryanshoover/orb-wpengine-deploy/master/lib/deploy.gitignore
+                                    fi
             - run:
-                name:         Remove git files from packages to ensure correct deployment.
-                command:      rm -rf wp-content/{mu-plugins,plugins,themes}/*/.git*
+                name:               Remove git files from packages to ensure correct deployment.
+                command:            rm -rf wp-content/{mu-plugins,plugins,themes}/*/.git*
             - run:
-                name:         Add all files for deployment
-                command:      git add .
+                name:               Add all files for deployment
+                command:            git add .
             - run:
-                name:         After adding all files, remove files that should be ignored
-                command:      git ls-files -z --ignored --exclude-standard | xargs -0 git rm -r --force --ignore-unmatch --cached
+                name:               After adding all files, remove files that should be ignored
+                command:            git ls-files -z --ignored --exclude-standard | xargs -0 git rm -r --force --ignore-unmatch --cached
             - run:
-                name:         Commit build files
-                command:      git commit -m "Deployment commit"
+                name:               Commit build files
+                command:            git commit -m "Deployment commit"
 
             - when:
-                condition:    ${ROLLBAR_ACCESS_TOKEN}
+                condition:          << parameters.rollbar_token >>
                 steps:
                     - rollbar/notify_deploy_started:
                         environment: << parameters.environment >>
 
             - deploy:
-                name:         Push to WPE environment
-                command:      |
-                              git push wpe  ${CIRCLE_BRANCH}-${CIRCLE_BUILD_NUM}
-                              git push wpe :${CIRCLE_BRANCH}-${CIRCLE_BUILD_NUM}
+                name:               Push to WPE environment
+                command:            |
+                                    git push wpe  ${CIRCLE_BRANCH}-${CIRCLE_BUILD_NUM}
+                                    git push wpe :${CIRCLE_BRANCH}-${CIRCLE_BUILD_NUM}
 
             - when:
-                condition:    ${ROLLBAR_ACCESS_TOKEN}
+                condition:          << parameters.rollbar_token >>
                 steps:
                     - rollbar/notify_deploy_finished:
                         status:     succeeded
