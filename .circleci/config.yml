@@ -36,13 +36,10 @@ workflows:
     lint_pack-validate_publish-dev:
         jobs:
             - orb-tools/lint
-            - orb-tools/pack:
-                  requires:
-                      - orb-tools/lint
             - orb-tools/publish-dev:
                   orb-name: ryanshoover/wpengine
                   requires:
-                      - orb-tools/pack
+                      - orb-tools/lint
             - orb-tools/trigger-integration-workflow:
                   filters:
                       branches:
