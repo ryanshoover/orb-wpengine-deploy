@@ -1,0 +1,79 @@
+description: |
+    General setup command. Handles cache, git checkout,
+    composer install, and yarn install.
+
+parameters:
+    production:
+        description: Is this a production build?
+        type: boolean
+        default: false
+    cache-name:
+        description: Specific cache name for different executors
+        type: string
+        default: base
+    include-composer:
+        description: Should composer skip dependencies?
+        type: boolean
+        default: false
+    include-yarn:
+        description: Should yarn skip dependencies?
+        type: boolean
+        default: false
+
+steps:
+
+    - checkout
+
+    - restore_cache:
+          keys:
+              - << parameters.cache-name >>-dependencies-{{ checksum "yarn.lock" }}-{{ checksum "composer.lock" }}
+              - << parameters.cache-name >>-dependencies-
+
+    - run:
+          name: Find composer and package in plugins & themes
+          command: |
+              echo 'export COMPOSER_DIRS=$(find . -regextype awk -regex "\./wp-content/(mu-plugins|plugins|themes)/(studiopress|wpengine)-[^/]*/composer.json" | sed "s|/[^/]*$||")' >> $BASH_ENV
+              echo 'export PACKAGE_DIRS=$(find . -regextype awk -regex "\./wp-content/(mu-plugins|plugins|themes)/(studiopress|wpengine)-[^/]*/package.json" | sed "s|/[^/]*$||")' >> $BASH_ENV
+              source $BASH_ENV
+
+    - when:
+          condition: << parameters.include-composer >>
+          steps:
+              - run:
+                    name: Install composer dependencies
+                    command: composer install <<# parameters.production >> --no-dev <</ parameters.production >> --no-ansi --no-interaction --optimize-autoloader --no-progress --prefer-dist
+              - run:
+                    name: Install plugin and theme composer dependencies
+                    command: |
+                        for COMPOSER_DIR in $COMPOSER_DIRS
+                        do
+                            echo "Installing in $COMPOSER_DIR"
+                            composer install --working-dir $COMPOSER_DIR <<# parameters.production >> --no-dev <</ parameters.production >> --no-ansi --no-interaction --optimize-autoloader --no-progress --prefer-dist
+                        done
+
+    - when:
+          condition: << parameters.include-yarn >>
+          steps:
+              - run:
+                    name: Add Gemfury registry
+                    command: npm config set @dxt:registry https://npm.fury.io/wpedxt/
+              - run:
+                    name: Add authentication to Gemfury
+                    command: echo "//npm.fury.io/wpedxt/:_authToken=${FURY_AUTH}" > .npmrc
+              - run:
+                    name: Install node dependencies
+                    command: yarn install <<# parameters.production >> --production <</ parameters.production >> --emoji false --no-progress --non-interactive
+              - run:
+                    name: Install plugin and theme node dependencies
+                    command: |
+                        for PACKAGE_DIR in $PACKAGE_DIRS
+                        do
+                            echo "Installing in $PACKAGE_DIR"
+                            yarn --cwd $PACKAGE_DIR install <<# parameters.production >> --production <</ parameters.production >> --emoji false --no-progress --non-interactive
+                        done
+
+    - save_cache:
+          paths:
+              - ./node_modules
+              - ./vendor
+          key: << parameters.cache-name >>-dependencies-{{ checksum "yarn.lock" }}-{{ checksum "composer.lock" }}

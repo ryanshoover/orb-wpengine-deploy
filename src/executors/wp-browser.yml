@@ -1,0 +1,18 @@
+working_directory:          /var/www/html
+
+docker:
+
+    - image:                ryanshoover/wp-browser:latest
+      environment:
+      DB_USER:            wordpress
+      DB_PASSWORD:        wordpress
+      DB_NAME:            wordpress
+      DB_HOST:            db
+
+    - image:                circleci/mysql:5
+      name:                 db
+      environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE:      wordpress
+      MYSQL_USER:          wordpress
+      MYSQL_PASSWORD:      wordpress

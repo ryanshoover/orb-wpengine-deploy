@@ -1,0 +1,22 @@
+description: Run visual regression tests using backstopjs
+parameters:
+    config:
+        description: Path to the backstop config file
+        type: string
+executor: backstop
+steps:
+    - checkout
+
+    - run:
+        name: Build reference files
+        command: backstop reference --config=<< parameters.config >>
+
+    - run:
+        name: Test against staging site
+        command: backstop test --config=<< parameters.config >>
+
+    - store_artifacts:
+          path: test-results
+
+    - store_test_results:
+          path: test-results
