@@ -1,16 +1,17 @@
-version: 2.1
-
 description: |
     A sample CircleCI config file that uses the ryanshoover/wpengine orb
     to run lint and codeception on a WordPress plugin
 
-orbs:
-    wpengine: ryanshoover/wpengine@x.y.z
+usage:
+    version: 2.1
 
-workflows:
-    version: 2
+    orbs:
+        wpengine: ryanshoover/wpengine@x.y.z
 
-    test:
-        jobs:
-            - wpengine/lint
-            - wpengine/packageCodeception
+    workflows:
+        version: 2
+
+        test:
+            jobs:
+                - wpengine/lint
+                - wpengine/packageCodeception
