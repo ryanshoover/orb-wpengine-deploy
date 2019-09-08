@@ -140,14 +140,19 @@ jobs:
                                     This job is based on the Docker image managed at https://github.com/ryanshoover/docker-wp-browser
         executor:                   wp-browser
         steps:
-            - run:
-                name:               Make sure WordPress is loaded
-                command:            /entrypoint.sh
             - install:
                 production:         false
                 cache-name:         wp-browser
                 include-composer:   true
                 include-yarn:       false
+            - run:
+                name:               Make sure WordPress is loaded
+                command:            /entrypoint.sh
+            - run:
+                name:               Move test files to working directory
+                command:            |
+                                    [ -d vendor/wpengine/dxt-tester/lib/codecept ] && mv vendor/wpengine/dxt-tester/lib/codecept .
+                                    [ -f vendor/wpengine/dxt-tester/lib/codeception.yml ] && mv vendor/wpengine/dxt-tester/lib/codeception.yml .
             - run:
                 name:               Run Codeception acceptance tests
                 command:            codecept run acceptance --xml="$CIRCLE_WORKING_DIRECTORY/test-results/acceptance/results.xml"
