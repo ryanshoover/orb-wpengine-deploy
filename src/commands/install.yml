@@ -21,7 +21,6 @@ parameters:
         default: false
 
 steps:
-
     - checkout
 
     - restore_cache:
@@ -48,7 +47,8 @@ steps:
                         for COMPOSER_DIR in $COMPOSER_DIRS
                         do
                             echo "Installing in $COMPOSER_DIR"
-                            composer install --working-dir $COMPOSER_DIR <<# parameters.production >> --no-dev <</ parameters.production >> --no-ansi --no-interaction --optimize-autoloader --no-progress --prefer-dist
+                            composer install --working-dir $COMPOSER_DIR <<# parameters.production >>--no-dev<</ parameters.production >> \
+                                --no-ansi --no-interaction --optimize-autoloader --no-progress --prefer-dist
                         done
 
     - when:

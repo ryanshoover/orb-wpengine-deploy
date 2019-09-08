@@ -7,54 +7,54 @@ workflows:
     integration-tests_prod-release:
         jobs:
             - orb-tools/dev-promote-prod:
-                filters:
-                    branches:
-                        ignore: /.*/
-                    tags:
-                        only: /master-patch.*/
-                name: dev-promote-patch
-                orb-name: ryanshoover/wpengine
+                  filters:
+                      branches:
+                          ignore: /.*/
+                      tags:
+                          only: /master-patch.*/
+                  name: dev-promote-patch
+                  orb-name: ryanshoover/wpengine
             - orb-tools/dev-promote-prod:
-                filters:
-                    branches:
-                        ignore: /.*/
-                    tags:
-                        only: /master-minor.*/
-                name: dev-promote-minor
-                orb-name: ryanshoover/wpengine
-                release: minor
+                  filters:
+                      branches:
+                          ignore: /.*/
+                      tags:
+                          only: /master-minor.*/
+                  name: dev-promote-minor
+                  orb-name: ryanshoover/wpengine
+                  release: minor
             - orb-tools/dev-promote-prod:
-                filters:
-                    branches:
-                        ignore: /.*/
-                    tags:
-                        only: /master-major.*/
-                name: dev-promote-major
-                orb-name: ryanshoover/wpengine
-                release: major
+                  filters:
+                      branches:
+                          ignore: /.*/
+                      tags:
+                          only: /master-major.*/
+                  name: dev-promote-major
+                  orb-name: ryanshoover/wpengine
+                  release: major
 
     lint_pack-validate_publish-dev:
         jobs:
             - orb-tools/lint
             - orb-tools/pack:
-                requires:
-                    - orb-tools/lint
+                  requires:
+                      - orb-tools/lint
             - orb-tools/publish-dev:
-                orb-name: ryanshoover/wpengine
-                requires:
-                    - orb-tools/pack
+                  orb-name: ryanshoover/wpengine
+                  requires:
+                      - orb-tools/pack
             - orb-tools/trigger-integration-workflow:
-                filters:
-                    branches:
-                        ignore: master
-                name: trigger-integration-dev
-                requires:
-                    - orb-tools/publish-dev
+                  filters:
+                      branches:
+                          ignore: master
+                  name: trigger-integration-dev
+                  requires:
+                      - orb-tools/publish-dev
             - orb-tools/trigger-integration-workflow:
-                filters:
-                    branches:
-                        only: master
-                name: trigger-integration-master
-                requires:
-                    - orb-tools/publish-dev
-                tag: master
+                  filters:
+                      branches:
+                          only: master
+                  name: trigger-integration-master
+                  requires:
+                      - orb-tools/publish-dev
+                  tag: master

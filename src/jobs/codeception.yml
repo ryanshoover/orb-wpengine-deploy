@@ -7,31 +7,31 @@ executor: wp-browser
 
 steps:
     - install:
-        production: false
-        cache-name: wp-browser
-        include-composer: true
-        include-yarn: false
+          production: false
+          cache-name: wp-browser
+          include-composer: true
+          include-yarn: false
     - run:
-        name: Make sure WordPress is loaded
-        command: /entrypoint.sh
+          name: Make sure WordPress is loaded
+          command: /entrypoint.sh
     - run:
-        name: Move test files to working directory
-        command: |
-            [ -d vendor/wpengine/dxt-tester/lib/codecept ] && mv vendor/wpengine/dxt-tester/lib/codecept .
-            [ -f vendor/wpengine/dxt-tester/lib/codeception.yml ] && mv vendor/wpengine/dxt-tester/lib/codeception.yml .
+          name: Move test files to working directory
+          command: |
+              [ -d vendor/wpengine/dxt-tester/lib/codecept ] && mv vendor/wpengine/dxt-tester/lib/codecept .
+              [ -f vendor/wpengine/dxt-tester/lib/codeception.yml ] && mv vendor/wpengine/dxt-tester/lib/codeception.yml .
 
     - run:
-        name: Run Codeception acceptance tests
-        command: codecept run acceptance --xml="$CIRCLE_WORKING_DIRECTORY/test-results/acceptance/results.xml"
+          name: Run Codeception acceptance tests
+          command: codecept run acceptance --xml="$CIRCLE_WORKING_DIRECTORY/test-results/acceptance/results.xml"
     - run:
-        name: Run Codeception functional tests
-        command: codecept run functional --xml="$CIRCLE_WORKING_DIRECTORY/test-results/functional/results.xml"
+          name: Run Codeception functional tests
+          command: codecept run functional --xml="$CIRCLE_WORKING_DIRECTORY/test-results/functional/results.xml"
     - run:
-        name: Run Codeception unit tests
-        command: codecept run unit --xml="$CIRCLE_WORKING_DIRECTORY/test-results/unit/results.xml"
+          name: Run Codeception unit tests
+          command: codecept run unit --xml="$CIRCLE_WORKING_DIRECTORY/test-results/unit/results.xml"
     - run:
-        name: Run Codeception wpunit tests
-        command: codecept run wpunit --xml="$CIRCLE_WORKING_DIRECTORY/test-results/wpunit/results.xml"
+          name: Run Codeception wpunit tests
+          command: codecept run wpunit --xml="$CIRCLE_WORKING_DIRECTORY/test-results/wpunit/results.xml"
 
     - store_test_results:
-        path: test-results
+          path: test-results

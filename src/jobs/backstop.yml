@@ -8,12 +8,12 @@ steps:
     - checkout
 
     - run:
-        name: Build reference files
-        command: backstop reference --config=<< parameters.config >>
+          name: Build reference files
+          command: backstop reference --config=<< parameters.config >>
 
     - run:
-        name: Test against staging site
-        command: backstop test --config=<< parameters.config >>
+          name: Test against staging site
+          command: backstop test --config=<< parameters.config >>
 
     - store_artifacts:
           path: test-results

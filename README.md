@@ -48,7 +48,7 @@ Build and deploy the codebase to a WP Engine environment
 
 ## Sample CircleCI Config
 
-See the [sample circleci config file](example_circleci/config.yml) for a copy-paste solution to get you up and running.
+See the [sample circleci config files](src/examples/) for a copy-paste solution to get you up and running.
 
 ## Environment Variables
 

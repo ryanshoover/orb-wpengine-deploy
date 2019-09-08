@@ -17,39 +17,39 @@ parameters:
 executor: wp-browser
 steps:
     - run:
-        name: Make sure WordPress is loaded
-        command: /entrypoint.sh
+          name: Make sure WordPress is loaded
+          command: /entrypoint.sh
     - restore_cache:
-        keys:
-            - packageCodeception-dependencies-{{ checksum "composer.lock" }}
-            - packageCodeception-dependencies-
+          keys:
+              - packageCodeception-dependencies-{{ checksum "composer.lock" }}
+              - packageCodeception-dependencies-
     - checkout:
-        path: /var/www/config/<< parameters.package_type >>/<< parameters.package_name >>
+          path: /var/www/config/<< parameters.package_type >>/<< parameters.package_name >>
     - run:
-        name: Install composer dependencies
-        command: composer install  --no-ansi --no-interaction --optimize-autoloader --no-progress
-        working_directory: /var/www/config/<< parameters.package_type >>/<< parameters.package_name >>
+          name: Install composer dependencies
+          command: composer install  --no-ansi --no-interaction --optimize-autoloader --no-progress
+          working_directory: /var/www/config/<< parameters.package_type >>/<< parameters.package_name >>
     - save_cache:
-        paths:
-            - /var/www/config/<< parameters.package_type >>/<< parameters.package_name >>/vendor
-        key: packageCodeception-dependencies-{{ checksum "composer.lock" }}
+          paths:
+              - /var/www/config/<< parameters.package_type >>/<< parameters.package_name >>/vendor
+          key: packageCodeception-dependencies-{{ checksum "composer.lock" }}
     - run:
-        name: Move test files to working directory
-        command: |
-            mv /var/www/config/<< parameters.package_type >>/<< parameters.package_name >>/vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
-            mv /var/www/config/<< parameters.package_type >>/<< parameters.package_name >>/vendor/wpengine/dxt-tester/lib/codeception.yml $CIRCLE_WORKING_DIRECTORY
-            mv /var/www/config/<< parameters.package_type >>/<< parameters.package_name >>/tests $CIRCLE_WORKING_DIRECTORY
+          name: Move test files to working directory
+          command: |
+              mv /var/www/config/<< parameters.package_type >>/<< parameters.package_name >>/vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
+              mv /var/www/config/<< parameters.package_type >>/<< parameters.package_name >>/vendor/wpengine/dxt-tester/lib/codeception.yml $CIRCLE_WORKING_DIRECTORY
+              mv /var/www/config/<< parameters.package_type >>/<< parameters.package_name >>/tests $CIRCLE_WORKING_DIRECTORY
     - run:
-        name: Run Codeception acceptance tests
-        command: codecept run acceptance --xml="$CIRCLE_WORKING_DIRECTORY/test-results/acceptance/results.xml"
+          name: Run Codeception acceptance tests
+          command: codecept run acceptance --xml="$CIRCLE_WORKING_DIRECTORY/test-results/acceptance/results.xml"
     - run:
-        name: Run Codeception functional tests
-        command: codecept run functional --xml="$CIRCLE_WORKING_DIRECTORY/test-results/functional/results.xml"
+          name: Run Codeception functional tests
+          command: codecept run functional --xml="$CIRCLE_WORKING_DIRECTORY/test-results/functional/results.xml"
     - run:
-        name: Run Codeception unit tests
-        command: codecept run unit --xml="$CIRCLE_WORKING_DIRECTORY/test-results/unit/results.xml"
+          name: Run Codeception unit tests
+          command: codecept run unit --xml="$CIRCLE_WORKING_DIRECTORY/test-results/unit/results.xml"
     - run:
-        name: Run Codeception wpunit tests
-        command: codecept run wpunit --xml="$CIRCLE_WORKING_DIRECTORY/test-results/wpunit/results.xml"
+          name: Run Codeception wpunit tests
+          command: codecept run wpunit --xml="$CIRCLE_WORKING_DIRECTORY/test-results/wpunit/results.xml"
     - store_test_results:
-        path: test-results
+          path: test-results

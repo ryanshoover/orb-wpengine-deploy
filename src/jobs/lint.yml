@@ -6,23 +6,23 @@ executor: base
 
 steps:
     - install:
-        production: false
-        cache-name: lint
-        include-composer: true
-        include-yarn: true
+          production: false
+          cache-name: lint
+          include-composer: true
+          include-yarn: true
 
     - run:
-        name: Run composer lint
-        command: |
-            if [[ -f composer.json && $(composer run --list | grep "\blint\b") ]]
-            then
-                composer run lint
-            fi
+          name: Run composer lint
+          command: |
+              if [[ -f composer.json && $(composer run --list | grep "\blint\b") ]]
+              then
+                  composer run lint
+              fi
 
     - run:
-        name: Run yarn lint
-        command: |
-            if [[ -f package.json && $(yarn run | grep "\blint\b") ]]
-            then
-                yarn run lint
-            fi
+          name: Run yarn lint
+          command: |
+              if [[ -f package.json && $(yarn run | grep "\blint\b") ]]
+              then
+                  yarn run lint
+              fi
