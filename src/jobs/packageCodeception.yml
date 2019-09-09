@@ -7,12 +7,11 @@ parameters:
     package_type:
         description: Is this a WordPress plugin or theme
         type: enum
-        enum: ["plugins", "themes"]
-        default: plugins
+        enum: ["plugin", "theme"]
+        default: plugin
     package_name:
         description: Name of the plugin or theme (directory name)
-        type: env_var_name
-        default: CIRCLE_PROJECT_REPONAME
+        type: string
 
 executor: wp-browser
 steps:
@@ -20,30 +19,30 @@ steps:
           name: Make sure WordPress is loaded
           command: /entrypoint.sh
 
+    - checkout:
+          path: /var/www/config/<< parameters.package_type >>s/<< parameters.package_name >>
+
     - restore_cache:
           keys:
-              - packageCodeception-dependencies-{{ checksum "/var/www/config/<< parameters.package_type >>/${<< parameters.package_name >>}/composer.lock" }}
+              - packageCodeception-dependencies-{{ checksum "/var/www/config/<< parameters.package_type >>s/<< parameters.package_name >>/composer.lock" }}
               - packageCodeception-dependencies-
-
-    - checkout:
-          path: /var/www/config/<< parameters.package_type >>/${<< parameters.package_name >>}
 
     - run:
           name: Install composer dependencies
           command: composer install  --no-ansi --no-interaction --optimize-autoloader --no-progress
-          working_directory: /var/www/config/<< parameters.package_type >>/${<< parameters.package_name >>}
+          working_directory: /var/www/config/<< parameters.package_type >>s/<< parameters.package_name >>
 
     - save_cache:
           paths:
-              - /var/www/config/<< parameters.package_type >>/${<< parameters.package_name >>}/vendor
-          key: packageCodeception-dependencies-{{ checksum "composer.lock" }}
+              - /var/www/config/<< parameters.package_type >>s/<< parameters.package_name >>/vendor
+          key: packageCodeception-dependencies-{{ checksum "/var/www/config/<< parameters.package_type >>s/<< parameters.package_name >>/composer.lock" }}
 
     - run:
           name: Move test files to working directory
           command: |
-              mv /var/www/config/<< parameters.package_type >>/${<< parameters.package_name >>}/vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
-              mv /var/www/config/<< parameters.package_type >>/${<< parameters.package_name >>}/vendor/wpengine/dxt-tester/lib/codeception.yml $CIRCLE_WORKING_DIRECTORY
-              mv /var/www/config/<< parameters.package_type >>/${<< parameters.package_name >>}/tests $CIRCLE_WORKING_DIRECTORY
+              mv /var/www/config/<< parameters.package_type >>s/<< parameters.package_name >>/vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
+              mv /var/www/config/<< parameters.package_type >>s/<< parameters.package_name >>/vendor/wpengine/dxt-tester/lib/codeception.yml $CIRCLE_WORKING_DIRECTORY
+              mv /var/www/config/<< parameters.package_type >>s/<< parameters.package_name >>/tests $CIRCLE_WORKING_DIRECTORY
 
     - run:
           name: Run Codeception acceptance tests
