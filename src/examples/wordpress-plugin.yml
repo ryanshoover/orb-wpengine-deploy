@@ -14,4 +14,6 @@ usage:
         test:
             jobs:
                 - wpengine/lint
-                - wpengine/packageCodeception
+                - wpengine/packageCodeception:
+                    package_type: plugin
+                    package_name: my-custom-plugin
