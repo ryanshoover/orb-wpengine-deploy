@@ -117,8 +117,9 @@ steps:
     - deploy:
           name: Push to WPE environment
           command: |
-              git push wpe  ${CIRCLE_BRANCH}-${CIRCLE_BUILD_NUM}
-              git push wpe :${CIRCLE_BRANCH}-${CIRCLE_BUILD_NUM}
+              # Push quietly to prevent showing the token in log
+              git push -q wpe  ${CIRCLE_BRANCH}-${CIRCLE_BUILD_NUM}
+              git push -q wpe :${CIRCLE_BRANCH}-${CIRCLE_BUILD_NUM}
 
     - when:
           condition: << parameters.rollbar_token >>
