@@ -11,10 +11,6 @@ parameters:
         description: Specific cache name for different executors
         type: string
         default: base
-    cache-version:
-        description: Cache version, used for cache busting. Overridden by CACHE_VERSION environment variable
-        type: env_var_name
-        default: CACHE_VERSION
     include-composer:
         description: Should composer skip dependencies?
         type: boolean
@@ -29,8 +25,8 @@ steps:
 
     - restore_cache:
           keys:
-              - << parameters.cache-name >>-<< parameters.cache-version >>-dependencies-{{ checksum "yarn.lock" }}-{{ checksum "composer.lock" }}
-              - << parameters.cache-name >>-<< parameters.cache-version >>-dependencies-
+              - << parameters.cache-name >>-{{ .Environment.CACHE_VERSION }}-dependencies-{{ checksum "yarn.lock" }}-{{ checksum "composer.lock" }}
+              - << parameters.cache-name >>-{{ .Environment.CACHE_VERSION }}-dependencies-
 
     - run:
           name: Find composer and package in plugins & themes
