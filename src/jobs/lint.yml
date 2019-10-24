@@ -2,12 +2,19 @@ description: |
     Lint the files to make sure everything follows best practices.
     `yarn run lint` can be a combination of phpcs, jslint, sass-lint, and more
 
+parameters:
+    cache_version:
+        description: Environment variable name that defines the current cache version (for cache busting)
+        type: env_var_name
+        default: CACHE_VERSION
+
 executor: base
 
 steps:
     - install:
           production: false
           cache-name: lint
+          cache-version: << parameters.cache_version >>
           include-composer: true
           include-yarn: true
 

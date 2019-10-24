@@ -3,12 +3,19 @@ description: |
     Codeception supports unit, wpunit, functional, and acceptance testing.
     This job is based on the Docker image managed at https://github.com/ryanshoover/docker-wp-browser
 
+parameters:
+    cache_version:
+        description: Environment variable name that defines the current cache version (for cache busting)
+        type: env_var_name
+        default: CACHE_VERSION
+
 executor: wp-browser
 
 steps:
     - install:
           production: false
           cache-name: wp-browser
+          cache-version: << parameters.cache_version >>
           include-composer: true
           include-yarn: false
     - run:

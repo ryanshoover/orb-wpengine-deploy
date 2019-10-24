@@ -12,6 +12,10 @@ parameters:
         description: API token for accessing Rollbar
         type: env_var_name
         default: ROLLBAR_ACCESS_TOKEN
+    cache_version:
+        description: Environment variable name that defines the current cache version (for cache busting)
+        type: env_var_name
+        default: CACHE_VERSION
 
 executor: base
 
@@ -19,6 +23,7 @@ steps:
     - install:
           production: true
           cache-name: build
+          cache-version: << parameters.cache_version >>
           include-composer: true
           include-yarn: true
 
