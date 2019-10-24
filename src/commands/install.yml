@@ -25,8 +25,8 @@ steps:
 
     - restore_cache:
           keys:
-              - << parameters.cache-name >>-dependencies-{{ checksum "yarn.lock" }}-{{ checksum "composer.lock" }}
-              - << parameters.cache-name >>-dependencies-
+              - << parameters.cache-name >>-{{ .Environment.CACHE_VERSION }}-dependencies-{{ checksum "yarn.lock" }}-{{ checksum "composer.lock" }}
+              - << parameters.cache-name >>-{{ .Environment.CACHE_VERSION }}-dependencies-
 
     - run:
           name: Find composer and package in plugins & themes
