@@ -13,8 +13,8 @@ parameters:
         default: base
     cache-version:
         description: Cache version, used for cache busting. Overridden by CACHE_VERSION environment variable
-        type: string
-        default: "v1"
+        type: env_var_name
+        default: CACHE_VERSION
     include-composer:
         description: Should composer skip dependencies?
         type: boolean
