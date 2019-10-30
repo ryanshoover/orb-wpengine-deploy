@@ -1,0 +1,2 @@
+docker:
+    - image: circleci/buildpack-deps:stable-curl
