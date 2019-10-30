@@ -11,7 +11,7 @@ parameters:
     token:
         description: Gemfury PUSH token
         type: env_var_name
-        default: GEMFURY_TOKEN
+        default: GEMFURY_TOKEN_PUSH
     project:
         description: Project name
         type: env_var_name
