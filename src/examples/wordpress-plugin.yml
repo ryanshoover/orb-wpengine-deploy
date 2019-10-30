@@ -1,6 +1,7 @@
 description: |
     A sample CircleCI config file that uses the ryanshoover/wpengine orb
-    to run lint and codeception on a WordPress plugin
+    to run lint and codeception on a WordPress plugin. It also deploys tags to
+    a Gemfury repository.
 
 usage:
     version: 2.1
@@ -11,9 +12,18 @@ usage:
     workflows:
         version: 2
 
-        test:
+        test-deploy:
             jobs:
                 - wpengine/lint
                 - wpengine/packageCodeception:
                     package_type: plugin
                     package_name: my-custom-plugin
+                - wpengine/deploy_fury:
+                    requires:
+                        - wpengine/lint
+                        - wpengine/packageCodeception
+                    filters:
+                        tags:
+                            only: /^\d+\.\d+\.\d+$/
+                        branches:
+                            ignore: /.*/

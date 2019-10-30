@@ -1,0 +1,30 @@
+description: |
+    Deploy a PHP, Node, or Ruby package to a Gemfury repository. Designed to be run on new GitHub releases.
+
+executor: curl
+
+parameters:
+    user:
+        description: Gemfury user or team name
+        type: env_var_name
+        default: GEMFURY_USER
+    token:
+        description: Gemfury PUSH token
+        type: env_var_name
+        default: GEMFURY_TOKEN
+    project:
+        description: Project name
+        type: env_var_name
+        default: CIRCLE_PROJECT_REPONAME
+
+steps:
+    - checkout
+    - run:
+        name: Add Fury git repo
+        command: git remote add fury https://<< parameters.user >>:<< parameters.token >>@git.fury.io/<< parameters.user >>/<< parameters.project >>.git
+    - run:
+        name: Check out master branch
+        command: git checkout master
+    - deploy:
+        name: Deploy to GemFury
+        command: git push fury master --tags
