@@ -19,7 +19,7 @@ steps:
             | grep linux_amd64.deb \
             | cut -d '"' -f 4 \
             | wget -qi -
-          apt install ./gh_*_linux_amd64.deb
+          sudo apt install ./gh_*_linux_amd64.deb
 
     - run:
         name: Get existing PR number
