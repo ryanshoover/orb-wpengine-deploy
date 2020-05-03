@@ -22,6 +22,15 @@ steps:
           sudo apt install ./gh_*_linux_amd64.deb
 
     - run:
+        name: Configure GH CLI
+        command: |
+          mkdir -p ~/.config/gh
+          echo "hosts:" >> ~/.config/gh/config.yml
+          echo "    github.com:" >> ~/.config/gh/config.yml
+          echo "        oauth_token: $GITHUB_OAUTH_TOKEN" >> ~/.config/gh/config.yml
+          echo "        user: $GITHUB_OAUTH_USER" >> ~/.config/gh/config.yml
+
+    - run:
         name: Get existing PR number
         command:
           echo 'export PR_NUM=$( gh pr list --repo=$CIRCLE_PROJECT_REPONAME --base=$TARGET_BRANCH | grep -o "^[[:digit:]]*" )' >> $BASH_ENV
