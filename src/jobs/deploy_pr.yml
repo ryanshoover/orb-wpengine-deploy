@@ -36,12 +36,21 @@ steps:
           echo 'export PR_NUM=$( gh pr list --repo=$CIRCLE_PROJECT_REPONAME --base=$TARGET_BRANCH | grep -o "^[[:digit:]]*" )' >> $BASH_ENV
 
     - run:
+        name: Get target branch hash
+        command: |
+          curl --location --request GET "https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/branches/<< parameters.target >>" \
+            --header 'Accept: application/vnd.github.v3+json' \
+            --header 'Accept: application/vnd.github.jean-grey-preview+json' \
+            --header "Authorization: token $GITHUB_TOKEN"
+
+    - run:
         name: Compile PR body
         command: |
           PR_BODY=""
           PR_URLS=$(echo $CIRCLE_PULL_REQUESTS | tr "," "\n")
 
           for PR_URL in $PR_URLS; do
+            [ -z $PR_URL ] && continue;
             PR_URL_BODY=$( gh pr view $PR_URL )
             TITLE=""
             INCLUDE=0
