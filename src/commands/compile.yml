@@ -1,0 +1,34 @@
+description: |
+    Compiles a package or project root. Installs composer, installs yarn, and runs yarn build.
+
+parameters:
+    working_directory:
+        description: Working directory to run the build in.
+        type: string
+
+steps:
+    - run:
+        name: Install Composer
+        command: |
+            [ -f composer.json ] && \
+            composer install --no-ansi --no-interaction --optimize-autoloader --no-progress --prefer-dist
+
+    - run:
+        name: Set up Gemfury
+        command: |
+            [ -f package.json ] && \
+            npm config set @dxt:registry https://npm.fury.io/wpedxt/ && \
+            echo "//npm.fury.io/wpedxt/:_authToken=${FURY_AUTH}" > .npmrc
+
+    - run:
+        name: Install Yarn
+        command: |
+            [ -f package.json ] && \
+            yarn install --emoji false --no-progress --non-interactive
+
+    - run:
+        name: Yarn build
+        command: |
+            if yarn run --non-interactive | grep -e "- build"; then
+                yarn run build
+            fi

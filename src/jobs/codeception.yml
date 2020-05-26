@@ -3,22 +3,73 @@ description: |
     Codeception supports unit, wpunit, functional, and acceptance testing.
     This job is based on the Docker image managed at https://github.com/ryanshoover/docker-wp-browser
 
+parameters:
+    package_type:
+        description: Is this a WordPress plugin or theme
+        type: enum
+        enum: ["plugin", "theme", "project"]
+        default: project
+    package_name:
+        description: Name of the plugin or theme (directory name)
+        type: string
+
 executor: wp-browser
 
 steps:
-    - install:
-          production: false
-          cache-name: wp-browser
-          include-composer: true
-          include-yarn: false
     - run:
           name: Make sure WordPress is loaded
           command: /entrypoint.sh
+
+    - when:
+          condition:
+            equal: [ project, << parameters.package_type >> ]
+          steps:
+            - install:
+                production: false
+                cache-name: codeception
+                include-composer: true
+                include-yarn: true
+            - compile:
+                working_directory: $CIRCLE_WORKING_DIRECTORY
+            - run:
+                name: Move test files to working directory
+                command: |
+                    [ -d vendor/wpengine/dxt-tester/lib/codecept ] && mv vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
+
+    - when:
+          condition:
+            equal: [ plugin, << parameters.package_type >> ]
+          steps:
+            - checkout:
+                path: /usr/local/src/config/plugins/<< parameters.package_name >>
+            - compile:
+                working_directory: /usr/local/src/config/plugins/<< parameters.package_name >>
+            - run:
+                name: Move test files to working directory
+                working_directory: /usr/local/src/config/plugins/<< parameters.package_name >>
+                command: |
+                    [ -d vendor/wpengine/dxt-tester/lib/codecept ] && mv vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
+
+    - when:
+          condition:
+            equal: [ theme, << parameters.package_type >> ]
+          steps:
+            - checkout:
+                path: /usr/local/src/config/themes/<< parameters.package_name >>
+            - compile:
+                working_directory: /usr/local/src/config/themes/<< parameters.package_name >>
+            - run:
+                name: Move test files to working directory
+                working_directory: /usr/local/src/config/themes/<< parameters.package_name >>
+                command: |
+                    [ -d vendor/wpengine/dxt-tester/lib/codecept ] && mv vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
+
     - run:
-          name: Move test files to working directory
+          name: Set up env variables for codeception symlinking
           command: |
-              [ -d vendor/wpengine/dxt-tester/lib/codecept ] && mv vendor/wpengine/dxt-tester/lib/codecept .
-              [ -f vendor/wpengine/dxt-tester/lib/codeception.yml ] && mv vendor/wpengine/dxt-tester/lib/codeception.yml .
+              echo 'export SYMLINK_YML=codeception.<< parameters.package_type >>.yml' $BASH_ENV
+              echo 'export SYMLINK_FOLDER=<< parameters.package_name >>' $BASH_ENV
+              source $BASH_ENV
 
     - run:
           name: Run Codeception acceptance tests
