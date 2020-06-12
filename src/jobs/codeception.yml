@@ -18,7 +18,7 @@ executor: wp-browser
 steps:
     - run:
           name: Make sure WordPress is loaded
-          command: /entrypoint.sh
+          command: entrypoint.sh
 
     - when:
           condition:
