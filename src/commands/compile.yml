@@ -6,6 +6,8 @@ parameters:
         description: Working directory to run the build in.
         type: string
 
+working_directory: << parameters.working_directory >>
+
 steps:
     - run:
         name: Install Composer
