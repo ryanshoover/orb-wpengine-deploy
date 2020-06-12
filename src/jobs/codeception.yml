@@ -67,8 +67,8 @@ steps:
     - run:
           name: Set up env variables for codeception symlinking
           command: |
-              echo 'export SYMLINK_YML=codeception.<< parameters.package_type >>.yml' $BASH_ENV
-              echo 'export SYMLINK_FOLDER=<< parameters.package_name >>' $BASH_ENV
+              echo 'export SYMLINK_YML=codeception.<< parameters.package_type >>.yml' >> $BASH_ENV
+              echo 'export SYMLINK_FOLDER=<< parameters.package_name >>' >> $BASH_ENV
               source $BASH_ENV
 
     - run:
