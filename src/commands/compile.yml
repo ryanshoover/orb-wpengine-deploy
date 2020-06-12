@@ -6,12 +6,11 @@ parameters:
         description: Working directory to run the build in.
         type: string
 
-working_directory: << parameters.working_directory >>
-
 steps:
     - run:
         name: Install Composer
         command: |
+            cd << parameters.working_directory >> || $CIRCLE_WORKING_DIRECTORY
             [ -f composer.json ] && \
             composer install --no-ansi --no-interaction --optimize-autoloader --no-progress --prefer-dist
 
@@ -25,12 +24,14 @@ steps:
     - run:
         name: Install Yarn
         command: |
+            cd << parameters.working_directory >> || $CIRCLE_WORKING_DIRECTORY
             [ -f package.json ] && \
             yarn install --emoji false --no-progress --non-interactive
 
     - run:
         name: Yarn build
         command: |
+            cd << parameters.working_directory >> || $CIRCLE_WORKING_DIRECTORY
             if yarn run --non-interactive | grep -e "- build"; then
                 yarn run build
             fi
