@@ -17,6 +17,7 @@ steps:
     - run:
         name: Set up Gemfury
         command: |
+            cd << parameters.working_directory >> || $CIRCLE_WORKING_DIRECTORY
             [ -f package.json ] && \
             npm config set @dxt:registry https://npm.fury.io/wpedxt/ && \
             echo "//npm.fury.io/wpedxt/:_authToken=${FURY_AUTH}" > .npmrc
