@@ -20,6 +20,10 @@ steps:
           name: Make sure WordPress is loaded
           command: entrypoint.sh
 
+    - run:
+          name: Set up composer bin directory
+          command: echo 'export PATH=$PATH:~/.composer/vendor/bin' >> $BASH_ENV
+
     - when:
           condition:
             equal: [ project, << parameters.package_type >> ]
