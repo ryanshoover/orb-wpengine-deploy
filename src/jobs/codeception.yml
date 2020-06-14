@@ -48,7 +48,8 @@ steps:
                 name: Move test files to working directory
                 working_directory: /usr/local/src/config/plugins/<< parameters.package_name >>
                 command: |
-                    [ -d vendor/wpengine/dxt-tester/lib/codecept ] && mv vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
+                    mv vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
+                    mv tests $CIRCLE_WORKING_DIRECTORY
 
     - when:
           condition:
@@ -62,7 +63,8 @@ steps:
                 name: Move test files to working directory
                 working_directory: /usr/local/src/config/themes/<< parameters.package_name >>
                 command: |
-                    [ -d vendor/wpengine/dxt-tester/lib/codecept ] && mv vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
+                    mv vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
+                    mv tests $CIRCLE_WORKING_DIRECTORY
 
     - run:
           name: Set up env variables for codeception symlinking
