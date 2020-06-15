@@ -12,6 +12,7 @@ parameters:
     package_name:
         description: Name of the plugin or theme (directory name)
         type: string
+        default: project
 
 executor: wp-browser
 
