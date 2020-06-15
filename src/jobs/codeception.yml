@@ -39,7 +39,9 @@ steps:
             - run:
                 name: Move test files to working directory
                 command: |
-                    [ -d vendor/wpengine/dxt-tester/lib/codecept ] && mv vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
+                    if [ -d vendor/wpengine/dxt-tester/lib/codecept ]; then
+                        mv vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
+                    fi
 
     - when:
           condition:
