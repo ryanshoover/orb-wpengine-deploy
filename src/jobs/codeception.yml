@@ -17,6 +17,8 @@ parameters:
 executor: wp-browser
 
 steps:
+    - installwpbrowser:
+
     - run:
           name: Set up composer bin directory
           command: echo 'export PATH=$PATH:~/.composer/vendor/bin' >> $BASH_ENV

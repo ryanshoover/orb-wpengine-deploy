@@ -1,7 +1,21 @@
 working_directory: /var/www/html
 
 docker:
-    - image: ryanshoover/wp-browser:latest
+    - image: circleci/php:apache-buster
+      environment:
+          DOCKERIZE_VERSION: v0.6.1
+          WORDPRESS_DB_HOST: mysql
+          WORDPRESS_DB_USER: wordpress
+          WORDPRESS_DB_PASSWORD: wordpress
+          WORDPRESS_DB_NAME: wordpress
+          WORDPRESS_DB_CHARSET: utf8
+          WORDPRESS_ROOT_FOLDER: /var/www/html
+          WORDPRESS_DOMAIN: localhost
+          WORDPRESS_URL: http://localhost
+          WORDPRESS_TABLE_PREFIX: wp_
+          WORDPRESS_ADMIN_EMAIL: admin@wp.local
+          WORDPRESS_ADMIN_USERNAME: admin
+          WORDPRESS_ADMIN_PASSWORD: password
 
     - image: circleci/mysql:5
       name: mysql
@@ -10,3 +24,6 @@ docker:
           MYSQL_DATABASE: wordpress
           MYSQL_USER: wordpress
           MYSQL_PASSWORD: wordpress
+
+    - image: selenium/standalone-chrome
+      name: webdriver
