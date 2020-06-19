@@ -18,10 +18,6 @@ executor: wp-browser
 
 steps:
     - run:
-          name: Make sure WordPress is loaded
-          command: entrypoint.sh
-
-    - run:
           name: Set up composer bin directory
           command: echo 'export PATH=$PATH:~/.composer/vendor/bin' >> $BASH_ENV
 
@@ -72,6 +68,10 @@ steps:
                 command: |
                     mv vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
                     mv tests $CIRCLE_WORKING_DIRECTORY
+
+    - run:
+          name: Make sure WordPress is loaded
+          command: entrypoint.sh
 
     - run:
           name: Set up env variables for codeception symlinking
