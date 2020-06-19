@@ -17,15 +17,15 @@ executor: wp-browser
 
 steps:
     - restore_cache:
-        keys:
-            - installwpbrowser
+          keys:
+              - installwpbrowser
 
     - run:
-        name: Enable yarn installation
-        command: |
-            apt-get update && apt-get -y install gnupg2
-            curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
-            echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+          name: Enable yarn installation
+          command: |
+              apt-get update && apt-get -y install gnupg2
+              curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+              echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 
     - run:
           name: Install apt needs
@@ -41,12 +41,12 @@ steps:
                 yarn
 
     - run:
-        name: Install PHP extensions
-        command: |
-            docker-php-ext-install \
-                bcmath \
-                pdo_mysql \
-                opcache
+          name: Install PHP extensions
+          command: |
+              docker-php-ext-install \
+                  bcmath \
+                  pdo_mysql \
+                  opcache
 
     - run:
           name: Configure PHP
@@ -108,48 +108,48 @@ steps:
               equal: [ project, << parameters.package_type >> ]
           steps:
               - install:
-                  production: false
-                  cache-name: codeception
-                  include-composer: true
-                  include-yarn: true
+                    production: false
+                    cache-name: codeception
+                    include-composer: true
+                    include-yarn: true
               - compile:
-                  working_directory: $CIRCLE_WORKING_DIRECTORY
+                    working_directory: $CIRCLE_WORKING_DIRECTORY
               - run:
-                  name: Move test files to working directory
-                  command: |
-                      if [ -d vendor/wpengine/dxt-tester/lib/codecept ]; then
-                          mv vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
-                      fi
+                    name: Move test files to working directory
+                    command: |
+                        if [ -d vendor/wpengine/dxt-tester/lib/codecept ]; then
+                            mv vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
+                        fi
 
     - when:
           condition:
-              equal: [ plugin, << parameters.package_type >> ]
+                equal: [ plugin, << parameters.package_type >> ]
           steps:
               - checkout:
-                  path: /usr/local/src/config/plugins/<< parameters.package_name >>
+                    path: /usr/local/src/config/plugins/<< parameters.package_name >>
               - compile:
-                  working_directory: /usr/local/src/config/plugins/<< parameters.package_name >>
+                    working_directory: /usr/local/src/config/plugins/<< parameters.package_name >>
               - run:
-                  name: Move test files to working directory
-                  working_directory: /usr/local/src/config/plugins/<< parameters.package_name >>
-                  command: |
-                      mv vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
-                      mv tests $CIRCLE_WORKING_DIRECTORY
+                    name: Move test files to working directory
+                    working_directory: /usr/local/src/config/plugins/<< parameters.package_name >>
+                    command: |
+                        mv vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
+                        mv tests $CIRCLE_WORKING_DIRECTORY
 
     - when:
           condition:
               equal: [ theme, << parameters.package_type >> ]
           steps:
               - checkout:
-                  path: /usr/local/src/config/themes/<< parameters.package_name >>
+                    path: /usr/local/src/config/themes/<< parameters.package_name >>
               - compile:
-                  working_directory: /usr/local/src/config/themes/<< parameters.package_name >>
+                    working_directory: /usr/local/src/config/themes/<< parameters.package_name >>
               - run:
-                  name: Move test files to working directory
-                  working_directory: /usr/local/src/config/themes/<< parameters.package_name >>
-                  command: |
-                      mv vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
-                      mv tests $CIRCLE_WORKING_DIRECTORY
+                    name: Move test files to working directory
+                    working_directory: /usr/local/src/config/themes/<< parameters.package_name >>
+                    command: |
+                        mv vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
+                        mv tests $CIRCLE_WORKING_DIRECTORY
 
     - run:
           name: Download WordPress

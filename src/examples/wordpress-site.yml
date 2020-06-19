@@ -48,7 +48,7 @@ usage:
                                   - master
                                   - production
 
-                  - wpengine/build_deploy:
+                - wpengine/build_deploy:
                       name: deploy-feature
                       environment: thenameofmyfeatureinstall
                       requires:
