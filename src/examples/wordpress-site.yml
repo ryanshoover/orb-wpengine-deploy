@@ -17,53 +17,53 @@ usage:
                 - wpengine/codeception
 
                 - wpengine/build_deploy:
-                    name: deploy-development
-                    environment: development
-                    requires:
-                        - wpengine/lint
-                        - wpengine/codeception
-                    filters:
-                        branches:
-                            only: development
+                      name: deploy-development
+                      environment: development
+                      requires:
+                          - wpengine/lint
+                          - wpengine/codeception
+                      filters:
+                          branches:
+                              only: development
 
                 - wpengine/build_deploy:
-                    name: deploy-staging
-                    environment: staging
-                    requires:
-                        - wpengine/lint
-                        - wpengine/codeception
-                    filters:
-                        branches:
-                            only: staging
+                      name: deploy-staging
+                      environment: staging
+                      requires:
+                          - wpengine/lint
+                          - wpengine/codeception
+                      filters:
+                          branches:
+                              only: staging
 
                 - wpengine/build_deploy:
-                    name: deploy-production
-                    environment: production
-                    requires:
-                        - wpengine/lint
-                        - wpengine/codeception
-                    filters:
-                        branches:
-                            only:
-                                - master
-                                - production
+                      name: deploy-production
+                      environment: production
+                      requires:
+                          - wpengine/lint
+                          - wpengine/codeception
+                      filters:
+                          branches:
+                              only:
+                                  - master
+                                  - production
 
-                - wpengine/build_deploy:
-                    name: deploy-feature
-                    environment: thenameofmyfeatureinstall
-                    requires:
-                        - wpengine/lint
-                        - wpengine/codeception
-                    filters:
-                        branches:
-                            only:
-                                - /feat-.*/
+                  - wpengine/build_deploy:
+                      name: deploy-feature
+                      environment: thenameofmyfeatureinstall
+                      requires:
+                          - wpengine/lint
+                          - wpengine/codeception
+                      filters:
+                          branches:
+                              only:
+                                  - /feat-.*/
 
         regression:
             jobs:
                 - wpengine/backstop:
-                    config: tests/_backstop/index.js
-                    filters:
-                        branches:
-                            only:
-                                - staging
+                      config: tests/_backstop/index.js
+                      filters:
+                          branches:
+                              only:
+                                  - staging

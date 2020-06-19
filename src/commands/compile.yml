@@ -8,15 +8,15 @@ parameters:
 
 steps:
     - run:
-        name: Install Composer
-        command: |
+          name: Install Composer
+          command: |
             cd << parameters.working_directory >> || $CIRCLE_WORKING_DIRECTORY
             [ -f composer.json ] && \
             composer install --no-ansi --no-interaction --optimize-autoloader --no-progress --prefer-dist
 
     - run:
-        name: Set up Gemfury
-        command: |
+          name: Set up Gemfury
+          command: |
             cd << parameters.working_directory >> || $CIRCLE_WORKING_DIRECTORY
             if [ -f package.json ]; then
                 npm config set @dxt:registry https://npm.fury.io/wpedxt/
@@ -24,16 +24,16 @@ steps:
             fi
 
     - run:
-        name: Install Yarn
-        command: |
+          name: Install Yarn
+          command: |
             cd << parameters.working_directory >> || $CIRCLE_WORKING_DIRECTORY
             if [ -f package.json ]; then
                 yarn install --emoji false --no-progress --non-interactive
             fi
 
     - run:
-        name: Yarn build
-        command: |
+          name: Yarn build
+          command: |
             cd << parameters.working_directory >> || $CIRCLE_WORKING_DIRECTORY
             if yarn run --non-interactive | grep -e "- build"; then
                 yarn run build

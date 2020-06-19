@@ -1,7 +1,6 @@
 description: |
     Run codeception tests for end-to-end testing on a WordPress site.
     Codeception supports unit, wpunit, functional, and acceptance testing.
-    This job is based on the Docker image managed at https://github.com/ryanshoover/docker-wp-browser
 
 parameters:
     package_type:
@@ -17,70 +16,179 @@ parameters:
 executor: wp-browser
 
 steps:
-    - installwpbrowser:
+    - restore_cache:
+        keys:
+            - installwpbrowser
 
     - run:
-          name: Set up composer bin directory
-          command: echo 'export PATH=$PATH:~/.composer/vendor/bin' >> $BASH_ENV
-
-    - when:
-          condition:
-            equal: [ project, << parameters.package_type >> ]
-          steps:
-            - install:
-                production: false
-                cache-name: codeception
-                include-composer: true
-                include-yarn: true
-            - compile:
-                working_directory: $CIRCLE_WORKING_DIRECTORY
-            - run:
-                name: Move test files to working directory
-                command: |
-                    if [ -d vendor/wpengine/dxt-tester/lib/codecept ]; then
-                        mv vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
-                    fi
-
-    - when:
-          condition:
-            equal: [ plugin, << parameters.package_type >> ]
-          steps:
-            - checkout:
-                path: /usr/local/src/config/plugins/<< parameters.package_name >>
-            - compile:
-                working_directory: /usr/local/src/config/plugins/<< parameters.package_name >>
-            - run:
-                name: Move test files to working directory
-                working_directory: /usr/local/src/config/plugins/<< parameters.package_name >>
-                command: |
-                    mv vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
-                    mv tests $CIRCLE_WORKING_DIRECTORY
-
-    - when:
-          condition:
-            equal: [ theme, << parameters.package_type >> ]
-          steps:
-            - checkout:
-                path: /usr/local/src/config/themes/<< parameters.package_name >>
-            - compile:
-                working_directory: /usr/local/src/config/themes/<< parameters.package_name >>
-            - run:
-                name: Move test files to working directory
-                working_directory: /usr/local/src/config/themes/<< parameters.package_name >>
-                command: |
-                    mv vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
-                    mv tests $CIRCLE_WORKING_DIRECTORY
+        name: Enable yarn installation
+        command: |
+            apt-get update && apt-get -y install gnupg2
+            curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+            echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 
     - run:
-          name: Make sure WordPress is loaded
-          command: entrypoint.sh
+          name: Install apt needs
+          command: |
+            apt-get update && \
+            apt-get -y install \
+                default-mysql-client \
+                libjpeg-dev \
+                libpng-dev \
+                libzip-dev \
+                nodejs \
+                npm \
+                yarn
+
+    - run:
+        name: Install PHP extensions
+        command: |
+            docker-php-ext-install \
+                bcmath \
+                pdo_mysql \
+                opcache
+
+    - run:
+          name: Configure PHP
+          command: echo "date.timezone = UTC" >> /usr/local/etc/php/php.ini
+
+    - run:
+          name: Install Dockerize
+          command: |
+            wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+                && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+                && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+
+    - run:
+          name: Install wp-browser globally
+          command: |
+            composer global require --optimize-autoloader \
+                lucatume/wp-browser \
+                codeception/module-asserts \
+                codeception/module-cli \
+                codeception/module-db \
+                codeception/module-filesystem \
+                codeception/module-phpbrowser \
+                codeception/module-rest \
+                codeception/module-webdriver \
+                codeception/util-universalframework \
+                league/factory-muffin \
+                league/factory-muffin-faker
+
+    - run:
+          name: Set up Apache
+          command: |
+            echo 'ServerName localhost' >> /etc/apache2/apache2.conf
+            a2enmod rewrite
+            service apache2 start
+
+    # Copy Codeception configs
+    # COPY config/codeception.*.yml /var/www/html/
+
+    - save_cache:
+          paths:
+              - /home/circleci/.composer/vendor/
+          key: installwpbrowser
+
+    - run: dockerize -wait tcp://$WORDPRESS_DB_HOST:3306 -timeout 1m
 
     - run:
           name: Set up env variables for codeception symlinking
           command: |
-              echo 'export SYMLINK_YML=codeception.<< parameters.package_type >>.yml' >> $BASH_ENV
-              echo 'export SYMLINK_FOLDER=<< parameters.package_name >>' >> $BASH_ENV
-              source $BASH_ENV
+            echo 'export SYMLINK_YML=codeception.<< parameters.package_type >>.yml' >> $BASH_ENV
+            echo 'export SYMLINK_FOLDER=<< parameters.package_name >>' >> $BASH_ENV
+            source $BASH_ENV
+
+    # Update our domain to just be the docker container's IP address
+    # export WORDPRESS_DOMAIN=$( hostname -i )
+    # export WORDPRESS_URL="http://$WORDPRESS_DOMAIN"
+
+    - when:
+          condition:
+              equal: [ project, << parameters.package_type >> ]
+          steps:
+              - install:
+                  production: false
+                  cache-name: codeception
+                  include-composer: true
+                  include-yarn: true
+              - compile:
+                  working_directory: $CIRCLE_WORKING_DIRECTORY
+              - run:
+                  name: Move test files to working directory
+                  command: |
+                      if [ -d vendor/wpengine/dxt-tester/lib/codecept ]; then
+                          mv vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
+                      fi
+
+    - when:
+          condition:
+              equal: [ plugin, << parameters.package_type >> ]
+          steps:
+              - checkout:
+                  path: /usr/local/src/config/plugins/<< parameters.package_name >>
+              - compile:
+                  working_directory: /usr/local/src/config/plugins/<< parameters.package_name >>
+              - run:
+                  name: Move test files to working directory
+                  working_directory: /usr/local/src/config/plugins/<< parameters.package_name >>
+                  command: |
+                      mv vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
+                      mv tests $CIRCLE_WORKING_DIRECTORY
+
+    - when:
+          condition:
+              equal: [ theme, << parameters.package_type >> ]
+          steps:
+              - checkout:
+                  path: /usr/local/src/config/themes/<< parameters.package_name >>
+              - compile:
+                  working_directory: /usr/local/src/config/themes/<< parameters.package_name >>
+              - run:
+                  name: Move test files to working directory
+                  working_directory: /usr/local/src/config/themes/<< parameters.package_name >>
+                  command: |
+                      mv vendor/wpengine/dxt-tester/lib/codecept $CIRCLE_WORKING_DIRECTORY
+                      mv tests $CIRCLE_WORKING_DIRECTORY
+
+    - run:
+          name: Download WordPress
+          command: wp core download
+
+    - run:
+          name: Config WordPress
+          command: |
+              wp config create \
+                  --dbname="$WORDPRESS_DB_NAME" \
+                  --dbuser="$WORDPRESS_DB_USER" \
+                  --dbpass="$WORDPRESS_DB_PASSWORD" \
+                  --dbhost="$WORDPRESS_DB_HOST" \
+                  --dbprefix="$WORDPRESS_TABLE_PREFIX" \
+                  --dbcharset="$WORDPRESS_DB_CHARSET" \
+                  --skip-check
+
+    - run:
+          name: Install WP if not yet installed
+          command: |
+              wp core install \
+                  --url=$WORDPRESS_URL \
+                  --title='Test' \
+                  --admin_user=$WORDPRESS_ADMIN_USERNAME \
+                  --admin_password=$WORDPRESS_ADMIN_PASSWORD \
+                  --admin_email=$WORDPRESS_ADMIN_EMAIL
+
+    - run: touch .env
+
+    - run:
+          name: Export a database dump
+          command: |
+              mkdir -p wp-content/mu-plugins
+              mkdir -p wp-content/plugins
+              mkdir -p wp-content/themes
+              wp db export wp-content/mysql.sql \
+                  --skip-plugins \
+                  --skip-themes \
+                  --allow-root
 
     - run:
           name: Run Codeception acceptance tests
