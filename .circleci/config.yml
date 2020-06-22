@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-    orb-tools: circleci/orb-tools@8
+    orb-tools: circleci/orb-tools@9
 
 workflows:
     integration-tests_prod-release:
@@ -36,9 +36,12 @@ workflows:
     lint_pack-validate_publish-dev:
         jobs:
             - orb-tools/lint
-            - orb-tools/pack:
+            - orb-tools/shellcheck
                   requires:
                       - orb-tools/lint
+            - orb-tools/pack:
+                  requires:
+                      - orb-tools/shellcheck
             - orb-tools/publish-dev:
                   orb-name: ryanshoover/wpengine
                   requires:
