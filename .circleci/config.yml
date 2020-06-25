@@ -24,7 +24,7 @@ parameters:
 jobs:
     test-codeception:
       docker:
-        - image: cimg/php:7-node
+        - image: cimg/php:7.4-node
       steps:
         - checkout
         - run: composer global exec codecept --version
