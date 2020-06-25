@@ -1,63 +1,76 @@
 version: 2.1
 
+# Orbs
 orbs:
     orb-tools: circleci/orb-tools@9
+    wpengine: ryanshoover/wpengine@<< pipeline.parameters.dev-orb-version >>
+
+orb_prep_jobs: &orb_prep_jobs
+    [
+      orb-tools/lint,
+      orb-tools/shellcheck,
+      orb-tools/pack
+    ]
+
+# Pipeline parameters
+parameters:
+    run-integration-tests:
+      type: boolean
+      default: false
+    dev-orb-version:
+      type: string
+      default: "dev:alpha"
+
+jobs:
+    test-codeception:
+      docker:
+        - image: cimg/php:7-node
+      steps:
+        - checkout
+        - run: composer global exec codecept --version
 
 workflows:
-    integration-tests_prod-release:
+    integration-tests:
+        when: << pipeline.parameters.run-integration-tests >>
         jobs:
-            - orb-tools/dev-promote-prod:
-                  filters:
-                      branches:
-                          ignore: /.*/
-                      tags:
-                          only: /master-patch.*/
-                  name: dev-promote-patch
-                  orb-name: ryanshoover/wpengine
-            - orb-tools/dev-promote-prod:
-                  filters:
-                      branches:
-                          ignore: /.*/
-                      tags:
-                          only: /master-minor.*/
-                  name: dev-promote-minor
-                  orb-name: ryanshoover/wpengine
-                  release: minor
-            - orb-tools/dev-promote-prod:
-                  filters:
-                      branches:
-                          ignore: /.*/
-                      tags:
-                          only: /master-major.*/
-                  name: dev-promote-major
-                  orb-name: ryanshoover/wpengine
-                  release: major
+        - test-codeception
 
     lint_pack-validate_publish-dev:
+        unless: << pipeline.parameters.run-integration-tests >>
         jobs:
-            - orb-tools/lint
-            - orb-tools/shellcheck:
-                  requires:
-                      - orb-tools/lint
-            - orb-tools/pack:
-                  requires:
-                      - orb-tools/shellcheck
-            - orb-tools/publish-dev:
-                  orb-name: ryanshoover/wpengine
-                  requires:
-                      - orb-tools/pack
-            - orb-tools/trigger-integration-workflow:
-                  filters:
-                      branches:
-                          ignore: master
-                  name: trigger-integration-dev
-                  requires:
-                      - orb-tools/publish-dev
-            - orb-tools/trigger-integration-workflow:
-                  filters:
-                      branches:
-                          only: master
-                  name: trigger-integration-master
-                  requires:
-                      - orb-tools/publish-dev
-                  tag: master
+        - orb-tools/lint
+        - orb-tools/shellcheck
+        - orb-tools/pack
+        - orb-tools/publish-dev:
+            orb-name: your-namespace/your-orb-name
+            requires:
+                - orb-tools/lint
+                - orb-tools/shellcheck
+                - orb-tools/pack
+        - orb-tools/trigger-integration-tests-workflow:
+            name: trigger-integration-dev
+            requires:
+                - orb-tools/publish-dev
+
+    tag-triggered-orb-publishing:
+        unless: << pipeline.parameters.run-integration-tests >>
+        jobs:
+        - hold-for-approval:
+            filters:
+                branches:
+                    ignore: /.*/
+                tags:
+                    only: /^(major|minor|patch)-release-v\d+\.\d+\.\d+$/
+            type: approval
+        - orb-tools/dev-promote-prod-from-git-tag:
+            add-pr-comment: true
+            bot-token-variable: GITHUB_TOKEN
+            bot-user: ryanshoover
+            filters:
+                branches:
+                    ignore: /.*/
+                tags:
+                    only: /^(major|minor|patch)-release-v\d+\.\d+\.\d+$/
+            orb-name: ryanshoover/wpengine
+            requires:
+                - hold-for-approval
