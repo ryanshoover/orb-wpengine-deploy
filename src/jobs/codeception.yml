@@ -21,13 +21,6 @@ steps:
               - installwpbrowser
 
     - run:
-          name: Enable yarn installation
-          command: |
-              apt-get update && apt-get -y install gnupg2
-              curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
-              echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
-
-    - run:
           name: Install apt needs
           command: |
             apt-get update && \
@@ -35,10 +28,7 @@ steps:
                 default-mysql-client \
                 libjpeg-dev \
                 libpng-dev \
-                libzip-dev \
-                nodejs \
-                npm \
-                yarn
+                libzip-dev
 
     - run:
           name: Install PHP extensions
