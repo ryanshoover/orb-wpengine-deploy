@@ -36,7 +36,7 @@ workflows:
     lint_pack-validate_publish-dev:
         jobs:
             - orb-tools/lint
-            - orb-tools/shellcheck
+            - orb-tools/shellcheck:
                   requires:
                       - orb-tools/lint
             - orb-tools/pack:
