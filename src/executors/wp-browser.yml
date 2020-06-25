@@ -1,7 +1,7 @@
 working_directory: /var/www/html
 
 docker:
-    - image: circleci/php:apache-buster
+    - image: cimg/php:7.4-node
       environment:
           DOCKERIZE_VERSION: v0.6.1
           WORDPRESS_DB_HOST: mysql
