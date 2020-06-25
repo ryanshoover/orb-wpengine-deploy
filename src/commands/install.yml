@@ -31,9 +31,9 @@ steps:
     - run:
           name: Find composer and package in plugins & themes
           command: |
-              echo 'export COMPOSER_DIRS=$(find . -regextype awk -regex "\./wp-content/(mu-plugins|plugins|themes)/(studiopress|wpengine)-[^/]*/composer.json" | sed "s|/[^/]*$||")' >> $BASH_ENV
-              echo 'export PACKAGE_DIRS=$(find . -regextype awk -regex "\./wp-content/(mu-plugins|plugins|themes)/(studiopress|wpengine)-[^/]*/package.json" | sed "s|/[^/]*$||")' >> $BASH_ENV
-              source $BASH_ENV
+              echo "export COMPOSER_DIRS=$(find . -regextype awk -regex "\./wp-content/(mu-plugins|plugins|themes)/(studiopress|wpengine)-[^/]*/composer.json" | sed "s|/[^/]*$||")" >> "$BASH_ENV"
+              echo "export PACKAGE_DIRS=$(find . -regextype awk -regex "\./wp-content/(mu-plugins|plugins|themes)/(studiopress|wpengine)-[^/]*/package.json" | sed "s|/[^/]*$||")" >> "$BASH_ENV"
+              source "$BASH_ENV"
 
     - when:
           condition: << parameters.include-composer >>

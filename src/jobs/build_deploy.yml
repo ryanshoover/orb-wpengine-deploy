@@ -25,7 +25,7 @@ steps:
     - run:
           name: Build compiled files
           command: |
-              if yarn run --non-interactive | grep -e "- build"
+              if yarn run --non-interactive | grep -qe "- build"
               then
                   yarn run build
               fi
@@ -33,12 +33,12 @@ steps:
     - run:
           name: Build plugin and theme compiled files
           command: |
-              for PACKAGE_DIR in $PACKAGE_DIRS
+              for PACKAGE_DIR in $(find . -regextype awk -regex "\./wp-content/(mu-plugins|plugins|themes)/(studiopress|wpengine)-[^/]*/package.json" | sed "s|/[^/]*$||")
               do
-                  if yarn --cwd $PACKAGE_DIR run --non-interactive | grep -e "- build"
+                  if yarn --cwd "$PACKAGE_DIR" run --non-interactive | grep -qe "- build"
                   then
-                      echo "Building in $PACKAGE_DIR"
-                      yarn --cwd $PACKAGE_DIR run build
+                      echo Building in "$PACKAGE_DIR"
+                      yarn --cwd "$PACKAGE_DIR" run build
                   fi
               done
 
@@ -55,37 +55,37 @@ steps:
     - run:
           name: Set up the WPE install name
           command: |
-              echo 'export WPE_INSTALL=$(
-                  case << parameters.environment >> in
+              echo "export WPE_INSTALL=$(
+                  case "<< parameters.environment >>" in
                       production)
-                          echo $WPE_PRODUCTION_INSTALL
+                          echo "$WPE_PRODUCTION_INSTALL"
                           ;;
                       staging)
-                          echo $WPE_STAGING_INSTALL
+                          echo "$WPE_STAGING_INSTALL"
                           ;;
                       development)
-                          echo $WPE_DEVELOPMENT_INSTALL
+                          echo "$WPE_DEVELOPMENT_INSTALL"
                           ;;
                       *)
-                          echo << parameters.environment >>
+                          echo "<< parameters.environment >>"
                           ;;
                   esac
-              )' >> $BASH_ENV
-              source $BASH_ENV
+              )" >> "$BASH_ENV"
+              source "$BASH_ENV"
 
     # Set up the git remotes for WP Engine
     - run:
           name: Set up the WP Engine install git remotes
           command: |
               git config --global user.email "deploy@circleci.local"
-              git config --global user.name ${CIRCLE_PROJECT_REPONAME}
-              git remote add wpe git@git.wpengine.com:production/${WPE_INSTALL}.git
+              git config --global user.name "$CIRCLE_PROJECT_REPONAME"
+              git remote add wpe "git@git.wpengine.com:production/${WPE_INSTALL}.git"
               git fetch wpe
 
     # Commit our build version of the code
     - run:
           name: Check out a new branch
-          command: git checkout -b ${CIRCLE_BRANCH}-${CIRCLE_BUILD_NUM}
+          command: git checkout -b "${CIRCLE_BRANCH}-${CIRCLE_BUILD_NUM}"
     - run:
           name: Swap our gitignore files
           command: |
@@ -118,8 +118,8 @@ steps:
     - deploy:
           name: Push to WPE environment
           command: |
-              git push wpe  ${CIRCLE_BRANCH}-${CIRCLE_BUILD_NUM}
-              git push wpe :${CIRCLE_BRANCH}-${CIRCLE_BUILD_NUM}
+              git push wpe  "${CIRCLE_BRANCH}-${CIRCLE_BUILD_NUM}"
+              git push wpe ":${CIRCLE_BRANCH}-${CIRCLE_BUILD_NUM}"
 
     - when:
           condition: << parameters.rollbar_token >>
