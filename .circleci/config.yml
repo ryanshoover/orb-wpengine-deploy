@@ -42,7 +42,7 @@ workflows:
         - orb-tools/shellcheck
         - orb-tools/pack
         - orb-tools/publish-dev:
-            orb-name: your-namespace/your-orb-name
+            orb-name: ryanshoover/wpengine
             requires:
                 - orb-tools/lint
                 - orb-tools/shellcheck
