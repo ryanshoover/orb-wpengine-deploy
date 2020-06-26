@@ -92,7 +92,7 @@ steps:
                             mv vendor/wpengine/dxt-tester/lib/codecept "$CIRCLE_WORKING_DIRECTORY"
                         fi
 
-    # Plugins and themes get installed in ~/project/{name} and symlinked to /var/www/html/wp-content
+    # Plugins and themes get installed in /home/circleci/project/{name} and symlinked to /var/www/html/wp-content
     - when:
           condition:
               or:
@@ -100,12 +100,12 @@ steps:
                   - equal: [ plugin, << parameters.package_type >> ]
           steps:
               - checkout:
-                    path: ~/project/<< parameters.package_name >>
+                    path: /home/circleci/project/<< parameters.package_name >>
               - compile:
-                    working_directory: ~/project/<< parameters.package_name >>
+                    working_directory: /home/circleci/project/<< parameters.package_name >>
               - run:
                     name: Move test files to working directory
-                    working_directory: ~/project/<< parameters.package_name >>
+                    working_directory: /home/circleci/project/<< parameters.package_name >>
                     command: |
                         mv vendor/wpengine/dxt-tester/lib/codecept "$CIRCLE_WORKING_DIRECTORY"
                         mv tests "$CIRCLE_WORKING_DIRECTORY"

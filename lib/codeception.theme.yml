@@ -5,4 +5,4 @@ extensions:
         tad\WPBrowser\Extension\Symlinker:
             mode: "theme"
             destination: "/var/www/html/wp-content/themes"
-            rootFolder: "~/project/%SYMLINK_FOLDER%"
+            rootFolder: "/home/circleciproject/%SYMLINK_FOLDER%"
