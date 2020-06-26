@@ -1,0 +1,65 @@
+actor: Tester
+paths:
+    tests: tests
+    log: tests/_output
+    data: codecept/_data
+    support: codecept/_support
+    envs: codecept/_envs
+params:
+    - env
+    - .env
+settings:
+    shuffle: true
+bootstrap: _bootstrap.php
+extensions:
+    commands:
+        - Codeception\Command\GenerateWPUnit
+        - Codeception\Command\GenerateWPRestApi
+        - Codeception\Command\GenerateWPRestController
+        - Codeception\Command\GenerateWPRestPostTypeController
+        - Codeception\Command\GenerateWPAjax
+        - Codeception\Command\GenerateWPCanonical
+        - Codeception\Command\GenerateWPXMLRPC
+modules:
+    config:
+        WPLoader:
+            loadOnly: false
+            dbName: '%WORDPRESS_DB_NAME%'
+            dbHost: '%WORDPRESS_DB_HOST%'
+            dbUser: '%WORDPRESS_DB_USER%'
+            dbPassword: '%WORDPRESS_DB_PASSWORD%'
+            tablePrefix: '%WORDPRESS_TABLE_PREFIX%'
+            wpRootFolder: '%WORDPRESS_ROOT_FOLDER%'
+            domain: '%WORDPRESS_URL%'
+            adminEmail: '%WORDPRESS_ADMIN_EMAIL%'
+        WPDb:
+            dsn: 'mysql:host=%WORDPRESS_DB_HOST%;dbname=%WORDPRESS_DB_NAME%'
+            user: '%WORDPRESS_DB_USER%'
+            password: '%WORDPRESS_DB_PASSWORD%'
+            url: '%WORDPRESS_URL%'
+            populator: 'mysql -u $user -p$password -h $host $dbname < $dump'
+            dump: wp-content/mysql.sql
+            populate: true
+            cleanup: true
+            urlReplacement: true
+            tablePrefix: '%WORDPRESS_TABLE_PREFIX%'
+        WPBrowser:
+            url: '%WORDPRESS_URL%'
+            adminPath: /wp-admin
+            adminUsername: '%WORDPRESS_ADMIN_USERNAME%'
+            adminPassword: '%WORDPRESS_ADMIN_PASSWORD%'
+        WPCLI:
+            path: '%WORDPRESS_ROOT_FOLDER%'
+        WPFilesystem:
+            wpRootFolder: '%WORDPRESS_ROOT_FOLDER%'
+        WPWebDriver:
+            url: '%WORDPRESS_URL%'
+            adminPath: /wp-admin
+            adminUsername: '%WORDPRESS_ADMIN_USERNAME%'
+            adminPassword: '%WORDPRESS_ADMIN_PASSWORD%'
+            window_size: false
+            host: webdriver
+            port: 4444
+            browser: chrome
+            start: true
+extends: "%SYMLINK_YML%"

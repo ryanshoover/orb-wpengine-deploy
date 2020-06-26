@@ -16,10 +16,6 @@ parameters:
 executor: wp-browser
 
 steps:
-    - restore_cache:
-          keys:
-              - installwpbrowser
-
     - run:
           name: Install apt needs
           command: |
@@ -29,6 +25,10 @@ steps:
                 libjpeg-dev \
                 libpng-dev \
                 libzip-dev
+
+    - restore_cache:
+          keys:
+              - installwpbrowser
 
     - run:
           name: Install wp-browser globally
@@ -47,6 +47,11 @@ steps:
                 league/factory-muffin-faker \
                 wp-cli/wp-cli
 
+    - save_cache:
+          key: installwpbrowser
+          paths:
+              - ~/.composer/vendor/
+
     - run:
           name: Set up Apache
           command: |
@@ -55,14 +60,7 @@ steps:
             sudo a2enconf localhost
             sudo service apache2 restart
             sudo chown circleci /var/www/html
-
-    # Copy Codeception configs
-    # COPY config/codeception.*.yml /var/www/html/
-
-    - save_cache:
-          paths:
-              - /home/circleci/.composer/vendor/
-          key: installwpbrowser
+            sudo rm -rf /var/www/html/*
 
     - run: dockerize -wait "tcp://$WORDPRESS_DB_HOST:3306" -timeout 1m
 
@@ -75,6 +73,7 @@ steps:
                   export SYMLINK_FOLDER="<< parameters.package_name >>"" >> "$BASH_ENV"
             source "$BASH_ENV"
 
+    # Projects get installed in /var/www/html
     - when:
           condition:
               equal: [ project, << parameters.package_type >> ]
@@ -85,7 +84,7 @@ steps:
                     include-composer: true
                     include-yarn: true
               - compile:
-                    working_directory: $CIRCLE_WORKING_DIRECTORY
+                    working_directory: /var/www/html
               - run:
                     name: Move test files to working directory
                     command: |
@@ -93,36 +92,25 @@ steps:
                             mv vendor/wpengine/dxt-tester/lib/codecept "$CIRCLE_WORKING_DIRECTORY"
                         fi
 
+    # Plugins and themes get installed in ~/project/{name} and symlinked to /var/www/html/wp-content
     - when:
           condition:
-                equal: [ plugin, << parameters.package_type >> ]
+              or:
+                  - equal: [ theme, << parameters.package_type >> ]
+                  - equal: [ plugin, << parameters.package_type >> ]
           steps:
               - checkout:
-                    path: /usr/local/src/config/plugins/<< parameters.package_name >>
+                    working_directory: ~/project/<< parameters.package_name >>
               - compile:
-                    working_directory: /usr/local/src/config/plugins/<< parameters.package_name >>
+                    working_directory: ~/project/<< parameters.package_name >>
               - run:
                     name: Move test files to working directory
-                    working_directory: /usr/local/src/config/plugins/<< parameters.package_name >>
+                    working_directory: ~/project/<< parameters.package_name >>
                     command: |
                         mv vendor/wpengine/dxt-tester/lib/codecept "$CIRCLE_WORKING_DIRECTORY"
                         mv tests "$CIRCLE_WORKING_DIRECTORY"
 
-    - when:
-          condition:
-              equal: [ theme, << parameters.package_type >> ]
-          steps:
-              - checkout:
-                    path: /usr/local/src/config/themes/<< parameters.package_name >>
-              - compile:
-                    working_directory: /usr/local/src/config/themes/<< parameters.package_name >>
-              - run:
-                    name: Move test files to working directory
-                    working_directory: /usr/local/src/config/themes/<< parameters.package_name >>
-                    command: |
-                        mv vendor/wpengine/dxt-tester/lib/codecept "$CIRCLE_WORKING_DIRECTORY"
-                        mv tests "$CIRCLE_WORKING_DIRECTORY"
-
+    # Download and install WordPress
     - run:
           name: Download WordPress
           command: wp core download
@@ -140,7 +128,7 @@ steps:
                   --skip-check
 
     - run:
-          name: Install WP if not yet installed
+          name: Install WordPress
           command: |
               wp core install \
                   --url="$WORDPRESS_URL" \
@@ -149,8 +137,7 @@ steps:
                   --admin_password="$WORDPRESS_ADMIN_PASSWORD" \
                   --admin_email="$WORDPRESS_ADMIN_EMAIL"
 
-    - run: touch .env
-
+    # Get ourselves a handy database dump for running tests
     - run:
           name: Export a database dump
           command: |
@@ -162,6 +149,19 @@ steps:
                   --skip-themes \
                   --allow-root
 
+    # Make sure .env exists in case the config depends on it
+    - run: touch .env
+
+    # Get base codeception dist files from the repo
+    - run:
+          name: Download codeception dist files
+          command: |
+              wget -nc -O codeception.dist.yml https://raw.githubusercontent.com/ryanshoover/orb-wpengine-deploy/master/lib/codeception.dist.yml
+              wget -nc -O codeception.plugin.yml https://raw.githubusercontent.com/ryanshoover/orb-wpengine-deploy/master/lib/codeception.plugin.yml
+              wget -nc -O codeception.project.yml https://raw.githubusercontent.com/ryanshoover/orb-wpengine-deploy/master/lib/codeception.project.yml
+              wget -nc -O codeception.theme.yml https://raw.githubusercontent.com/ryanshoover/orb-wpengine-deploy/master/lib/codeception.theme.yml
+
+    # Run all our tests, one suite at a time
     - run:
           name: Run Codeception acceptance tests
           command: codecept run acceptance --xml="$CIRCLE_WORKING_DIRECTORY/test-results/acceptance/results.xml"
@@ -175,6 +175,7 @@ steps:
           name: Run Codeception wpunit tests
           command: codecept run wpunit --xml="$CIRCLE_WORKING_DIRECTORY/test-results/wpunit/results.xml"
 
+    # Save the results
     - store_test_results:
           path: test-results
 
