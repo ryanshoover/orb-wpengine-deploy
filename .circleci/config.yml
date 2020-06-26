@@ -7,70 +7,70 @@ orbs:
 
 orb_prep_jobs: &orb_prep_jobs
     [
-      orb-tools/lint,
-      orb-tools/shellcheck,
-      orb-tools/pack
+        orb-tools/lint,
+        orb-tools/shellcheck,
+        orb-tools/pack
     ]
 
 # Pipeline parameters
 parameters:
     run-integration-tests:
-      type: boolean
-      default: false
+        type: boolean
+        default: false
     dev-orb-version:
-      type: string
-      default: "dev:alpha"
+        type: string
+        default: "dev:alpha"
 
 jobs:
     test-codeception:
-      docker:
-        - image: cimg/php:7.4-node
-      steps:
-        - checkout
-        - run: composer global exec codecept --version
+        docker:
+            - image: cimg/php:7.4-node
+        steps:
+            - checkout
+            - run: composer global exec codecept --version
 
 workflows:
     integration-tests:
         when: << pipeline.parameters.run-integration-tests >>
         jobs:
-        - test-codeception
+            - test-codeception
 
     lint_pack-validate_publish-dev:
         unless: << pipeline.parameters.run-integration-tests >>
         jobs:
-        - orb-tools/lint
-        - orb-tools/shellcheck
-        - orb-tools/pack
-        - orb-tools/publish-dev:
-            orb-name: ryanshoover/wpengine
-            requires:
-                - orb-tools/lint
-                - orb-tools/shellcheck
-                - orb-tools/pack
-        - orb-tools/trigger-integration-tests-workflow:
-            name: trigger-integration-dev
-            requires:
-                - orb-tools/publish-dev
+            - orb-tools/lint
+            - orb-tools/shellcheck
+            - orb-tools/pack
+            - orb-tools/publish-dev:
+                  orb-name: ryanshoover/wpengine
+                  requires:
+                      - orb-tools/lint
+                      - orb-tools/shellcheck
+                      - orb-tools/pack
+            - orb-tools/trigger-integration-tests-workflow:
+                  name: trigger-integration-dev
+                  requires:
+                      - orb-tools/publish-dev
 
     tag-triggered-orb-publishing:
         unless: << pipeline.parameters.run-integration-tests >>
         jobs:
-        - hold-for-approval:
-            filters:
-                branches:
-                    ignore: /.*/
-                tags:
-                    only: /^(major|minor|patch)-release-v\d+\.\d+\.\d+$/
-            type: approval
-        - orb-tools/dev-promote-prod-from-git-tag:
-            add-pr-comment: true
-            bot-token-variable: GITHUB_TOKEN
-            bot-user: ryanshoover
-            filters:
-                branches:
-                    ignore: /.*/
-                tags:
-                    only: /^(major|minor|patch)-release-v\d+\.\d+\.\d+$/
-            orb-name: ryanshoover/wpengine
-            requires:
-                - hold-for-approval
+            - hold-for-approval:
+                  filters:
+                      branches:
+                          ignore: /.*/
+                      tags:
+                          only: /^(major|minor|patch)-release-v\d+\.\d+\.\d+$/
+                  type: approval
+            - orb-tools/dev-promote-prod-from-git-tag:
+                  add-pr-comment: true
+                  bot-token-variable: GITHUB_TOKEN
+                  bot-user: ryanshoover
+                  filters:
+                      branches:
+                          ignore: /.*/
+                      tags:
+                          only: /^(major|minor|patch)-release-v\d+\.\d+\.\d+$/
+                  orb-name: ryanshoover/wpengine
+                  requires:
+                      - hold-for-approval
