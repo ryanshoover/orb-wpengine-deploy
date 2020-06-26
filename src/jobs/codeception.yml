@@ -100,7 +100,7 @@ steps:
                   - equal: [ plugin, << parameters.package_type >> ]
           steps:
               - checkout:
-                    working_directory: ~/project/<< parameters.package_name >>
+                    path: ~/project/<< parameters.package_name >>
               - compile:
                     working_directory: ~/project/<< parameters.package_name >>
               - run:
