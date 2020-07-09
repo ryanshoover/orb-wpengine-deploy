@@ -21,7 +21,7 @@ steps:
     - checkout
     - run:
           name: Add Fury git repo
-          command: git remote add fury "https://<< parameters.user >>:<< parameters.token >>@git.fury.io/<< parameters.user >>/<< parameters.project >>.git"
+          command: git remote add fury "https://$<< parameters.user >>:$<< parameters.token >>@git.fury.io/$<< parameters.user >>/$<< parameters.project >>.git"
     - run:
           name: Check out master branch
           command: git checkout master
