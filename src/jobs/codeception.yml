@@ -55,7 +55,12 @@ steps:
     - run:
           name: Set up Apache
           command: |
-            echo 'ServerName localhost' | sudo tee -a /etc/apache2/conf-available/localhost.conf > /dev/null
+            echo 'ServerName localhost
+            <Directory /var/www/html>
+                  Options Indexes FollowSymLinks
+                  AllowOverride All
+                  Require all granted
+            </Directory>' | sudo tee -a /etc/apache2/conf-available/localhost.conf > /dev/null
             sudo a2enmod rewrite
             sudo a2enconf localhost
             sudo service apache2 restart
@@ -114,6 +119,18 @@ steps:
     - run:
           name: Download WordPress
           command: wp core download
+
+    - run:
+          name: Create htaccess file
+          command: |
+              echo '# BEGIN WordPress
+              RewriteEngine On
+              RewriteBase /
+              RewriteRule ^index\.php$ - [L]
+              RewriteCond %{REQUEST_FILENAME} !-f
+              RewriteCond %{REQUEST_FILENAME} !-d
+              RewriteRule . /index.php [L]
+              # END WordPress' | tee -a .htaccess > /dev/null
 
     - run:
           name: Config WordPress
