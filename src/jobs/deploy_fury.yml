@@ -47,7 +47,10 @@ steps:
 
     - run:
           name: Rewrite tag with compiled files
-          command: git tag -f -m "Fury deployment compiled" "$CIRCLE_TAG"
+          command: |
+              if [[ -z "${CIRCLE_TAG}" ]]; then
+                git tag -f -m "Fury deployment compiled" "$CIRCLE_TAG"
+              fi
 
     - deploy:
           name: Deploy to GemFury
