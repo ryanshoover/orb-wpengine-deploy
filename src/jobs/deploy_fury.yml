@@ -19,12 +19,36 @@ parameters:
 
 steps:
     - checkout
+
     - run:
           name: Add Fury git repo
           command: git remote add fury "https://$<< parameters.user >>:$<< parameters.token >>@git.fury.io/$<< parameters.user >>/$<< parameters.project >>.git"
+
     - run:
           name: Check out master branch
           command: git checkout master
+
+    - install:
+          production: true
+          cache-name: deploy_fury
+          include-composer: true
+          include-yarn: true
+
+    - run:
+          name: Build compiled files
+          command: |
+              if yarn run --non-interactive | grep -qe "- build"
+              then
+                  yarn run build
+              fi
+
+    - gitignoreswap:
+          gitignore_type: package
+
+    - run:
+          name: Rewrite tag with compiled files
+          command: git tag -f -m 'Fury deployment compiled' $CIRCLE_TAG
+
     - deploy:
           name: Deploy to GemFury
           command: git push fury master --tags

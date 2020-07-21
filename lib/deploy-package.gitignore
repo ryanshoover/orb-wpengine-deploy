@@ -1,0 +1,48 @@
+# Build files
+.editorconfig
+.github
+.nvmrc
+
+# Node dependency files
+/node_modules/
+auth.json
+
+# Source files
+/src/
+
+# Test files
+/tests/
+
+# Mac-specific files
+.DS_Store
+
+# Dev files
+*.codekit
+.svn
+.sass-cache
+
+# Known large file types
+*.sql
+*.hqx
+*.bin
+*.exe
+*.dll
+*.deb
+*.dmg
+*.iso
+*.img
+*.msi
+*.msp
+*.msm
+*.mid
+*.midi
+*.kar
+*.mng
+*.asx
+*.asf
+*.wmv
+*.zip
+*.tar
+*.tgz
+*.gz
+*.mp4

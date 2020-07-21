@@ -1,0 +1,33 @@
+description: |
+    Swaps gitignore file for one that
+
+parameters:
+    gitignore_type:
+        description: Type of gitignore file to load
+        type: enum
+        enum: ["site", "package"]
+        default: site
+
+steps:
+    - run:
+          name: Swap our gitignore files
+          command: |
+              if [ -f ./.gitignores/__deployment ]; then
+                  rm -f .gitignore
+                  ln -s ./.gitignores/__deployment .gitignore
+              else
+                  rm -f .gitignore
+                  wget -nc -O .gitignore https://raw.githubusercontent.com/ryanshoover/orb-wpengine-deploy/master/lib/deploy-<< parameters.gitignore_type >>.gitignore
+              fi
+    - run:
+          name: Remove git files from packages to ensure correct deployment.
+          command: rm -rf wp-content/{mu-plugins,plugins,themes}/*/.git*
+    - run:
+          name: Add all files for deployment
+          command: git add .
+    - run:
+          name: After adding all files, remove files that should be ignored
+          command: git ls-files -z --ignored --exclude-standard | xargs -0 git rm -r --force --ignore-unmatch --cached
+    - run:
+          name: Commit build files
+          command: git commit -m "Deployment commit"
