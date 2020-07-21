@@ -17,7 +17,7 @@ steps:
                   ln -s ./.gitignores/__deployment .gitignore
               else
                   rm -f .gitignore
-                  wget -nc -O .gitignore https://raw.githubusercontent.com/ryanshoover/orb-wpengine-deploy/master/lib/deploy-<< parameters.gitignore_type >>.gitignore
+                  wget -nc -O .gitignore "https://raw.githubusercontent.com/ryanshoover/orb-wpengine-deploy/master/lib/deploy-<< parameters.gitignore_type >>.gitignore"
               fi
     - run:
           name: Remove git files from packages to ensure correct deployment.
