@@ -85,7 +85,6 @@ steps:
           steps:
               - install:
                     production: false
-                    cache-name: codeception
                     include-composer: true
                     include-yarn: true
               - compile:

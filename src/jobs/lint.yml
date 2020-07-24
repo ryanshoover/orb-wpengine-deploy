@@ -7,20 +7,19 @@ executor: base
 steps:
     - install:
           production: false
-          cache-name: lint
           include-composer: true
           include-yarn: true
 
     - run:
           name: Run composer lint
           command: |
-              if -f composer.json && composer run --list | grep -q -e "\blint\b";then
+              if jq '.scripts.lint' composer.json; then
                   composer run lint
               fi
 
     - run:
           name: Run yarn lint
           command: |
-            if -f package.json && yarn run | grep -q -e "\blint\b"; then
+            if jq '.scripts.lint' package.json; then
                 yarn run lint
             fi
