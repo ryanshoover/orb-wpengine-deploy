@@ -87,8 +87,6 @@ steps:
                     production: false
                     include-composer: true
                     include-yarn: true
-              - compile:
-                    working_directory: /var/www/html
               - run:
                     name: Move test files to working directory
                     command: |

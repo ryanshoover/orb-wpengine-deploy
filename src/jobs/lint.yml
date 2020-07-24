@@ -20,6 +20,6 @@ steps:
     - run:
           name: Run yarn lint
           command: |
-            if jq '.scripts.lint' package.json; then
-                yarn run lint
-            fi
+              if jq '.scripts.lint' package.json; then
+                  yarn run lint
+              fi
