@@ -1,7 +1,7 @@
 description: |
     Deploy a PHP, Node, or Ruby package to a Gemfury repository. Designed to be run on new GitHub releases.
 
-executor: curl
+executor: base
 
 parameters:
     user:
