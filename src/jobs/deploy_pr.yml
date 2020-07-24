@@ -11,70 +11,62 @@ parameters:
 
 steps:
     - checkout
+
     - run:
         name: Install GH CLI
         command: |
-          curl -s https://api.github.com/repos/cli/cli/releases/latest \
-            | grep browser_download_url \
-            | grep linux_amd64.deb \
-            | cut -d '"' -f 4 \
-            | wget -qi -
-          sudo apt install ./gh_*_linux_amd64.deb
+            curl -s https://api.github.com/repos/cli/cli/releases/latest \
+              | grep browser_download_url \
+              | grep linux_amd64.deb \
+              | cut -d '"' -f 4 \
+              | wget -qi -
+            sudo apt install ./gh_*_linux_amd64.deb
 
     - run:
         name: Configure GH CLI
         command: |
-          mkdir -p ~/.config/gh
-          echo "hosts:" >> ~/.config/gh/config.yml
-          echo "    github.com:" >> ~/.config/gh/config.yml
-          echo "        oauth_token: $GITHUB_OAUTH_TOKEN" >> ~/.config/gh/config.yml
-          echo "        user: $GITHUB_OAUTH_USER" >> ~/.config/gh/config.yml
+            mkdir -p ~/.config/gh
+            echo "hosts:" >> ~/.config/gh/config.yml
+            echo "    github.com:" >> ~/.config/gh/config.yml
+            echo "        oauth_token: $GITHUB_OAUTH_TOKEN" >> ~/.config/gh/config.yml
+            echo "        user: $GITHUB_OAUTH_USER" >> ~/.config/gh/config.yml
 
     - run:
         name: Get existing PR number
-        command:
-          echo 'export PR_NUM=$( gh pr list --repo=$CIRCLE_PROJECT_REPONAME --base=$TARGET_BRANCH | grep -o "^[[:digit:]]*" )' >> $BASH_ENV
-
-    - run:
-        name: Get target branch hash
         command: |
-          curl --location --request GET "https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/branches/<< parameters.target >>" \
-            --header 'Accept: application/vnd.github.v3+json' \
-            --header 'Accept: application/vnd.github.jean-grey-preview+json' \
-            --header "Authorization: token $GITHUB_TOKEN"
+            gh pr close $( gh pr list --repo=$CIRCLE_PROJECT_REPONAME --base=$TARGET_BRANCH | grep -o "^[[:digit:]]*" )
+            exit 0 # always succeed, even if there's not a PR to close
 
     - run:
         name: Compile PR body
         command: |
-          PR_BODY=""
-          PR_URLS=$(echo $CIRCLE_PULL_REQUESTS | tr "," "\n")
+            PR_BODY=""
+            PR_URLS=$(echo $CIRCLE_PULL_REQUESTS | tr "," "\n")
 
-          for PR_URL in $PR_URLS; do
-            [ -z $PR_URL ] && continue;
-            PR_URL_BODY=$( gh pr view $PR_URL )
-            TITLE=""
-            INCLUDE=0
+            for PR_URL in $PR_URLS; do
+                [ -z $PR_URL ] && continue;
+                PR_URL_BODY=$( gh pr view $PR_URL )
+                TITLE=""
+                INCLUDE=0
 
-            for LINE in $PR_URL_BODY; do
-              [[ -z "$TITLE" && $LINE =~ "^[[:space:]]" ]] && TITLE=$( echo $LINE | xargs ) && PR_BODY="$PR_BODY\n$TITLE"
+                for LINE in $PR_URL_BODY; do
+                    [[ -z "$TITLE" && $LINE =~ "^[[:space:]]" ]] && TITLE=$( echo $LINE | xargs ) && PR_BODY="$PR_BODY\n$TITLE"
 
-              LINE=$( echo $LINE | xargs )
+                    LINE=$( echo $LINE | xargs )
 
-              [[ $LINE =~ "^#" ]] && INCLUDE=0
-              [[ "## Deploy Notes" == "$LINE" || "## Steps to Test or Reproduce" == "$LINE" ]] && INCLUDE=1
+                    [[ $LINE =~ "^#" ]] && INCLUDE=0
+                    [[ "## Deploy Notes" == "$LINE" || "## Steps to Test or Reproduce" == "$LINE" ]] && INCLUDE=1
 
-              [[ $INCLUDE = 1 ]] && PR_BODY="$PR_BODY\n$LINE"
+                    [[ $INCLUDE = 1 ]] && PR_BODY="$PR_BODY\n$LINE"
+                done
+                PR_BODY="$PR_BODY\n"
             done
-            PR_BODY="$PR_BODY\n"
-          done
-          echo 'export PR_BODY' >>> $BASH_ENV
+            echo 'export PR_BODY' >>> $BASH_ENV
 
     - deploy:
         name: Create PR
         command: |
-          if [ -z $PR_NUM ]; then
             gh pr create \
               --base=<< parameters.target >> \
               --title="<< parameters.target >> ← $CIRCLE_BRANCH" \
               --body="$BODY"
-          fi
