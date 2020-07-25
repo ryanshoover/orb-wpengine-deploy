@@ -16,14 +16,14 @@ usage:
             jobs:
                 - wpengine/lint
                 - wpengine/packageCodeception:
-                    package_type: plugin
-                    package_name: my-custom-plugin
+                      package_type: plugin
+                      package_name: my-custom-plugin
                 - wpengine/deploy_fury:
-                    requires:
-                        - wpengine/lint
-                        - wpengine/packageCodeception
-                    filters:
-                        tags:
-                            only: /^\d+\.\d+\.\d+$/
-                        branches:
-                            ignore: /.*/
+                      requires:
+                          - wpengine/lint
+                          - wpengine/packageCodeception
+                      filters:
+                          tags:
+                              only: /^\d+\.\d+\.\d+$/
+                          branches:
+                              ignore: /.*/
