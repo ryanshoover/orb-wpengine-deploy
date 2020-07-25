@@ -1,2 +1,2 @@
 docker:
-    - image: circleci/php:7-apache-node-browsers-legacy
+    - image: cimg/php:7.4-node

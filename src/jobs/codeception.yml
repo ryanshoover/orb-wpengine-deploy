@@ -85,11 +85,8 @@ steps:
           steps:
               - install:
                     production: false
-                    cache-name: codeception
                     include-composer: true
                     include-yarn: true
-              - compile:
-                    working_directory: /var/www/html
               - run:
                     name: Move test files to working directory
                     command: |

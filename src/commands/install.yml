@@ -7,10 +7,6 @@ parameters:
         description: Is this a production build?
         type: boolean
         default: false
-    cache-name:
-        description: Specific cache name for different executors
-        type: string
-        default: base
     include-composer:
         description: Should composer skip dependencies?
         type: boolean
@@ -23,30 +19,27 @@ parameters:
 steps:
     - checkout
 
-    - restore_cache:
-          keys:
-              - << parameters.cache-name >>-{{ .Environment.CACHE_VERSION }}-dependencies-{{ checksum "yarn.lock" }}-{{ checksum "composer.lock" }}
-              - << parameters.cache-name >>-{{ .Environment.CACHE_VERSION }}-dependencies-
-
     - when:
           condition: << parameters.include-composer >>
           steps:
+              - restore_cache:
+                    keys:
+                        - composer-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum "composer.lock" }}
               - run:
                     name: Install composer dependencies
                     command: composer install <<# parameters.production >> --no-dev <</ parameters.production >> --no-ansi --no-interaction --optimize-autoloader --no-progress --prefer-dist
-              - run:
-                    name: Install plugin and theme composer dependencies
-                    command: |
-                        for COMPOSER_DIR in $(find . -regextype awk -regex "\./wp-content/(mu-plugins|plugins|themes)/(studiopress|wpengine)-[^/]*/composer.json" | sed "s|/[^/]*$||")
-                        do
-                            echo "Installing in $COMPOSER_DIR"
-                            composer install --working-dir $COMPOSER_DIR <<# parameters.production >>--no-dev<</ parameters.production >> \
-                                --no-ansi --no-interaction --optimize-autoloader --no-progress --prefer-dist
-                        done
+
+              - save_cache:
+                    paths:
+                        - ./vendor
+                    key: composer-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum "composer.lock" }}
 
     - when:
           condition: << parameters.include-yarn >>
           steps:
+              - restore_cache:
+                    keys:
+                        - yarn-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum "yarn.lock" }}
               - run:
                     name: Add Gemfury registry
                     command: npm config set @dxt:registry https://npm.fury.io/wpedxt/
@@ -56,17 +49,14 @@ steps:
               - run:
                     name: Install node dependencies
                     command: yarn install <<# parameters.production >> --production <</ parameters.production >> --emoji false --no-progress --non-interactive
+              - save_cache:
+                    paths:
+                        - ./node_modules
+                    key: yarn-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum "yarn.lock" }}
               - run:
-                    name: Install plugin and theme node dependencies
+                    name: Build compiled files
                     command: |
-                        for PACKAGE_DIR in $(find . -regextype awk -regex "\./wp-content/(mu-plugins|plugins|themes)/(studiopress|wpengine)-[^/]*/package.json" | sed "s|/[^/]*$||")
-                        do
-                            echo "Installing in $PACKAGE_DIR"
-                            yarn --cwd $PACKAGE_DIR install <<# parameters.production >> --production <</ parameters.production >> --emoji false --no-progress --non-interactive
-                        done
+                        if jq '.scripts.build' package.json; then
+                            yarn run build
+                        fi
 
-    - save_cache:
-          paths:
-              - ./node_modules
-              - ./vendor
-          key: << parameters.cache-name >>-dependencies-{{ checksum "yarn.lock" }}-{{ checksum "composer.lock" }}

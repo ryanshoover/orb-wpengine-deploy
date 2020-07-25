@@ -35,6 +35,6 @@ steps:
           name: Yarn build
           command: |
             cd "<< parameters.working_directory >>" || $CIRCLE_WORKING_DIRECTORY
-            if yarn run --non-interactive | grep -e "- build"; then
+            if jq '.scripts.build' package.json; then
                 yarn run build
             fi
