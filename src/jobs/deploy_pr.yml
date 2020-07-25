@@ -26,15 +26,17 @@ steps:
         name: Configure GH CLI
         command: |
             mkdir -p ~/.config/gh
-            echo "hosts:" >> ~/.config/gh/config.yml
-            echo "    github.com:" >> ~/.config/gh/config.yml
-            echo "        oauth_token: $GITHUB_OAUTH_TOKEN" >> ~/.config/gh/config.yml
-            echo "        user: $GITHUB_OAUTH_USER" >> ~/.config/gh/config.yml
+            {
+                echo "hosts:"
+                echo "    github.com:"
+                echo "        oauth_token: $GITHUB_OAUTH_TOKEN"
+                echo "        user: $GITHUB_OAUTH_USER"
+            } >> ~/.config/gh/config.yml
 
     - run:
         name: Get existing PR number
         command: |
-            gh pr close $( gh pr list --repo=$CIRCLE_PROJECT_REPONAME --base=$TARGET_BRANCH | grep -o "^[[:digit:]]*" )
+            gh pr close "$( gh pr list --repo=$CIRCLE_PROJECT_REPONAME --base=$TARGET_BRANCH | grep -o "^[[:digit:]]*" )"
             exit 0 # always succeed, even if there's not a PR to close
 
     - run:
@@ -61,7 +63,7 @@ steps:
                 done
                 PR_BODY="$PR_BODY\n"
             done
-            echo 'export PR_BODY' >>> $BASH_ENV
+            echo "export PR_BODY" >> $BASH_ENV
 
     - deploy:
         name: Create PR
