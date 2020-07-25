@@ -36,25 +36,25 @@ steps:
     - run:
         name: Get existing PR number
         command: |
-            gh pr close "$( gh pr list --repo=$CIRCLE_PROJECT_REPONAME --base=$TARGET_BRANCH | grep -o "^[[:digit:]]*" )"
+            gh pr close "$( gh pr list --repo="$CIRCLE_PROJECT_REPONAME" --base="$TARGET_BRANCH" | grep -o "^[[:digit:]]*" )"
             exit 0 # always succeed, even if there's not a PR to close
 
     - run:
         name: Compile PR body
         command: |
             PR_BODY=""
-            PR_URLS=$(echo $CIRCLE_PULL_REQUESTS | tr "," "\n")
+            PR_URLS=$(echo "$CIRCLE_PULL_REQUESTS" | tr "," "\n")
 
             for PR_URL in $PR_URLS; do
-                [ -z $PR_URL ] && continue;
-                PR_URL_BODY=$( gh pr view $PR_URL )
+                [ -z "$PR_URL" ] && continue;
+                PR_URL_BODY="$( gh pr view "$PR_URL" )"
                 TITLE=""
                 INCLUDE=0
 
                 for LINE in $PR_URL_BODY; do
-                    [[ -z "$TITLE" && $LINE =~ "^[[:space:]]" ]] && TITLE=$( echo $LINE | xargs ) && PR_BODY="$PR_BODY\n$TITLE"
+                    [[ -z "$TITLE" && $LINE =~ ^[[:space:]] ]] && TITLE="$( echo "$LINE" | xargs )" && PR_BODY="$PR_BODY\n$TITLE"
 
-                    LINE=$( echo $LINE | xargs )
+                    LINE="$( echo "$LINE" | xargs )"
 
                     [[ $LINE =~ "^#" ]] && INCLUDE=0
                     [[ "## Deploy Notes" == "$LINE" || "## Steps to Test or Reproduce" == "$LINE" ]] && INCLUDE=1
@@ -63,7 +63,7 @@ steps:
                 done
                 PR_BODY="$PR_BODY\n"
             done
-            echo "export PR_BODY" >> $BASH_ENV
+            echo "export PR_BODY" >> "$BASH_ENV"
 
     - deploy:
         name: Create PR
