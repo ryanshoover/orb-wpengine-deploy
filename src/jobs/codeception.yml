@@ -55,17 +55,15 @@ steps:
     - run:
           name: Set up Apache
           command: |
-            echo 'ServerName localhost
-            <Directory /var/www/html>
+            echo "ServerName localhost
+            <Directory ${CIRCLE_WORKING_DIRECTORY}>
                   Options Indexes FollowSymLinks
                   AllowOverride All
                   Require all granted
-            </Directory>' | sudo tee -a /etc/apache2/conf-available/localhost.conf > /dev/null
+            </Directory>" | sudo tee -a /etc/apache2/conf-available/localhost.conf > /dev/null
             sudo a2enmod rewrite
             sudo a2enconf localhost
             sudo service apache2 restart
-            sudo chown circleci /var/www/html
-            sudo rm -rf /var/www/html/*
 
     - run: dockerize -wait "tcp://$WORDPRESS_DB_HOST:3306" -timeout 1m
 
@@ -78,7 +76,7 @@ steps:
                   export SYMLINK_FOLDER="<< parameters.package_name >>"" >> "$BASH_ENV"
             source "$BASH_ENV"
 
-    # Projects get installed in /var/www/html
+    # Projects get installed in $CIRCLE_WORKING_DIRECTORY
     - when:
           condition:
               equal: [ project, << parameters.package_type >> ]
@@ -94,17 +92,24 @@ steps:
                             mv vendor/wpengine/dxt-tester/lib/codecept "$CIRCLE_WORKING_DIRECTORY"
                         fi
 
-    # Plugins and themes get installed in /home/circleci/project/{name} and symlinked to /var/www/html/wp-content
+    # Plugins and themes get installed in $CIRCLE_WORKING_DIRECTORY/{name}
+    # and symlinked to $CIRCLE_WORKING_DIRECTORY/wp-content/[plugins|themes]/{name}
     - when:
           condition:
               or:
                   - equal: [ theme, << parameters.package_type >> ]
                   - equal: [ plugin, << parameters.package_type >> ]
           steps:
+              - run:
+                    name: Create project working directory env var
+                    command: echo "export PACKAGE_WORKING_DIRECTORY=$CIRCLE_WORKING_DIRECTORY/<< parameters.package_name >>"q >> "$BASH_ENV"
               - checkout:
                     path: /home/circleci/project/<< parameters.package_name >>
-              - compile:
-                    working_directory: /home/circleci/project/<< parameters.package_name >>
+              - install:
+                    production: false
+                    include-composer: true
+                    include-yarn: true
+                    working-directory: PACKAGE_WORKING_DIRECTORY
               - run:
                     name: Move test files to working directory
                     working_directory: /home/circleci/project/<< parameters.package_name >>
@@ -117,6 +122,7 @@ steps:
           name: Download WordPress
           command: wp core download
 
+    # Add the standard htaccess file, since wp-cli unreliably creates it
     - run:
           name: Create htaccess file
           command: |
@@ -129,6 +135,7 @@ steps:
               RewriteRule . /index.php [L]
               # END WordPress' | tee -a .htaccess > /dev/null
 
+    # Create our wp-config.php file
     - run:
           name: Config WordPress
           command: |
@@ -141,6 +148,7 @@ steps:
                   --dbcharset="$WORDPRESS_DB_CHARSET" \
                   --skip-check
 
+    # Install the WP database
     - run:
           name: Install WordPress
           command: |

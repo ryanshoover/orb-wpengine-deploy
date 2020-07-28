@@ -15,6 +15,10 @@ parameters:
         description: Should yarn skip dependencies?
         type: boolean
         default: false
+    working-directory:
+         type: env_var_name
+         default: CIRCLE_WORKING_DIRECTORY
+
 
 steps:
     - checkout
@@ -24,38 +28,45 @@ steps:
           steps:
               - restore_cache:
                     keys:
-                        - composer-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum "composer.lock" }}
+                        - composer-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum "$<< parameters.working-directory >>/composer.lock" }}
               - run:
                     name: Install composer dependencies
-                    command: composer install <<# parameters.production >> --no-dev <</ parameters.production >> --no-ansi --no-interaction --optimize-autoloader --no-progress --prefer-dist
+                    command: |
+                        cd $<< parameters.working-directory >>
+                        composer install <<# parameters.production >> --no-dev <</ parameters.production >> --no-ansi --no-interaction --optimize-autoloader --no-progress --prefer-dist
 
               - save_cache:
                     paths:
-                        - ./vendor
-                    key: composer-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum "composer.lock" }}
+                        - "$<< parameters.working-directory >>/vendor"
+                    key: composer-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum "$<< parameters.working-directory >>/composer.lock" }}
 
     - when:
           condition: << parameters.include-yarn >>
           steps:
               - restore_cache:
                     keys:
-                        - yarn-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum "yarn.lock" }}
+                        - yarn-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum "$<< parameters.working-directory >>/yarn.lock" }}
               - run:
                     name: Add Gemfury registry
                     command: npm config set @dxt:registry https://npm.fury.io/wpedxt/
               - run:
                     name: Add authentication to Gemfury
-                    command: echo "//npm.fury.io/wpedxt/:_authToken=${FURY_AUTH}" > .npmrc
+                    command: |
+                        cd $<< parameters.working-directory >>
+                        echo "//npm.fury.io/wpedxt/:_authToken=${FURY_AUTH}" > .npmrc
               - run:
                     name: Install node dependencies
-                    command: yarn install <<# parameters.production >> --production <</ parameters.production >> --emoji false --no-progress --non-interactive
+                    command: |
+                        cd $<< parameters.working-directory >>
+                        yarn install <<# parameters.production >> --production <</ parameters.production >> --emoji false --no-progress --non-interactive
               - save_cache:
                     paths:
-                        - ./node_modules
-                    key: yarn-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum "yarn.lock" }}
+                        - "$<< parameters.working-directory >>/node_modules"
+                    key: yarn-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum "$<< parameters.working-directory >>/yarn.lock" }}
               - run:
                     name: Build compiled files
                     command: |
+                        cd $<< parameters.working-directory >>
                         if jq '.scripts.build' package.json; then
                             yarn run build
                         fi
