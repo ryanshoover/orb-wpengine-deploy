@@ -30,7 +30,6 @@ steps:
 
     - install:
           production: true
-          cache-name: deploy_fury
           include-composer: true
           include-yarn: true
 
