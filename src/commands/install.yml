@@ -28,27 +28,26 @@ steps:
           steps:
               - restore_cache:
                     keys:
-                        - composer-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum "$<< parameters.working-directory >>/composer.lock" }}
+                        - composer-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum composer.lock }}
               - run:
                     name: Install composer dependencies
                     command: |
                         cd $<< parameters.working-directory >>
                         composer install <<# parameters.production >> --no-dev <</ parameters.production >> --no-ansi --no-interaction --optimize-autoloader --no-progress --prefer-dist
-
               - save_cache:
                     paths:
-                        - "$<< parameters.working-directory >>/vendor"
-                    key: composer-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum "$<< parameters.working-directory >>/composer.lock" }}
+                        - "./vendor"
+                    key: composer-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum composer.lock }}
 
     - when:
           condition: << parameters.include-yarn >>
           steps:
               - restore_cache:
                     keys:
-                        - yarn-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum "$<< parameters.working-directory >>/yarn.lock" }}
+                        - yarn-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum yarn.lock }}
               - run:
                     name: Add Gemfury registry
-                    command: npm config set @dxt:registry https://npm.fury.io/wpedxt/
+                    command: npm config set @dxt:registry "https://npm.fury.io/wpedxt/"
               - run:
                     name: Add authentication to Gemfury
                     command: |
@@ -62,7 +61,7 @@ steps:
               - save_cache:
                     paths:
                         - "$<< parameters.working-directory >>/node_modules"
-                    key: yarn-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum "$<< parameters.working-directory >>/yarn.lock" }}
+                    key: yarn-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum yarn.lock }}
               - run:
                     name: Build compiled files
                     command: |
