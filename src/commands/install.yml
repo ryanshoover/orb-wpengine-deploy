@@ -28,7 +28,7 @@ steps:
           steps:
               - restore_cache:
                     keys:
-                        - composer-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum composer.lock }}
+                        - composer-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum "composer.lock" }}
               - run:
                     name: Install composer dependencies
                     command: |
@@ -37,14 +37,14 @@ steps:
               - save_cache:
                     paths:
                         - "./vendor"
-                    key: composer-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum composer.lock }}
+                    key: composer-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum "composer.lock" }}
 
     - when:
           condition: << parameters.include-yarn >>
           steps:
               - restore_cache:
                     keys:
-                        - yarn-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum yarn.lock }}
+                        - yarn-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum "yarn.lock" }}
               - run:
                     name: Add Gemfury registry
                     command: npm config set @dxt:registry "https://npm.fury.io/wpedxt/"
@@ -61,7 +61,7 @@ steps:
               - save_cache:
                     paths:
                         - "$<< parameters.working-directory >>/node_modules"
-                    key: yarn-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum yarn.lock }}
+                    key: yarn-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum "yarn.lock" }}
               - run:
                     name: Build compiled files
                     command: |
