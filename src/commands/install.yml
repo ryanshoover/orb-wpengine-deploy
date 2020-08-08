@@ -15,13 +15,20 @@ parameters:
         description: Should yarn skip dependencies?
         type: boolean
         default: false
+    checkout:
+        description: Should we checkout the source from Git?
+        type: boolean
+        default: true
     working-directory:
          type: env_var_name
          default: CIRCLE_WORKING_DIRECTORY
 
 
 steps:
-    - checkout
+    - when:
+          condition: << parameters.checkout >>
+          steps:
+              - checkout
 
     # See https://discuss.circleci.com/t/circle-working-directory-doesnt-expand/17007
     - run:

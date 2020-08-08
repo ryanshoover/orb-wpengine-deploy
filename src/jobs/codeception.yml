@@ -102,13 +102,14 @@ steps:
           steps:
               - run:
                     name: Create project working directory env var
-                    command: echo "export PACKAGE_WORKING_DIRECTORY=$CIRCLE_WORKING_DIRECTORY/<< parameters.package_name >>"q >> "$BASH_ENV"
+                    command: echo "export PACKAGE_WORKING_DIRECTORY=$CIRCLE_WORKING_DIRECTORY/<< parameters.package_name >>" >> "$BASH_ENV"
               - checkout:
                     path: /home/circleci/project/<< parameters.package_name >>
               - install:
                     production: false
                     include-composer: true
                     include-yarn: true
+                    checkout: false
                     working-directory: PACKAGE_WORKING_DIRECTORY
               - run:
                     name: Move test files to working directory
