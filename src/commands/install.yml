@@ -23,6 +23,11 @@ parameters:
 steps:
     - checkout
 
+    # See https://discuss.circleci.com/t/circle-working-directory-doesnt-expand/17007
+    - run:
+            name: "Fix relative working directories"
+            command: echo '<< parameters.working-directory >>="${<< parameters.working-directory >>/#\~/$HOME}"' >> $BASH_ENV
+
     - when:
           condition: << parameters.include-composer >>
           steps:
