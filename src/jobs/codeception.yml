@@ -115,7 +115,9 @@ steps:
                     name: Move test files to working directory
                     working_directory: /home/circleci/project/<< parameters.package_name >>
                     command: |
-                        mv vendor/wpengine/dxt-tester/lib/codecept "$CIRCLE_WORKING_DIRECTORY"
+                        if [ composer show wpengine/dxt-tester ]; then
+                              mv vendor/wpengine/dxt-tester/lib/codecept "$CIRCLE_WORKING_DIRECTORY"
+                        fi
                         mv tests "$CIRCLE_WORKING_DIRECTORY"
 
     # Download and install WordPress
