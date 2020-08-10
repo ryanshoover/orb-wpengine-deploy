@@ -1,5 +1,3 @@
-working_directory: /var/www/html
-
 docker:
     - image: cimg/php:7.4-node
       environment:
@@ -9,7 +7,7 @@ docker:
           WORDPRESS_DB_PASSWORD: wordpress
           WORDPRESS_DB_NAME: wordpress
           WORDPRESS_DB_CHARSET: utf8
-          WORDPRESS_ROOT_FOLDER: /var/www/html
+          WORDPRESS_ROOT_FOLDER: /home/circleci/project
           WORDPRESS_DOMAIN: localhost
           WORDPRESS_URL: http://localhost
           WORDPRESS_TABLE_PREFIX: wp_

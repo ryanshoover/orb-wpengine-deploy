@@ -5,10 +5,8 @@ description: |
 executor: base
 
 steps:
-    - install:
-          production: false
-          include-composer: true
-          include-yarn: true
+    - attach_workspace:
+          at: .
 
     - run:
           name: Run composer lint

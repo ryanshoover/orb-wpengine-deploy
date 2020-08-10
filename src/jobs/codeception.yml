@@ -55,38 +55,30 @@ steps:
     - run:
           name: Set up Apache
           command: |
-            echo 'ServerName localhost
-            <Directory /var/www/html>
+            echo "ServerName localhost
+            <Directory ${CIRCLE_WORKING_DIRECTORY}>
                   Options Indexes FollowSymLinks
                   AllowOverride All
                   Require all granted
-            </Directory>' | sudo tee -a /etc/apache2/conf-available/localhost.conf > /dev/null
+            </Directory>" | sudo tee -a /etc/apache2/conf-available/localhost.conf > /dev/null
             sudo a2enmod rewrite
             sudo a2enconf localhost
             sudo service apache2 restart
-            sudo chown circleci /var/www/html
-            sudo rm -rf /var/www/html/*
-
-    - run: dockerize -wait "tcp://$WORDPRESS_DB_HOST:3306" -timeout 1m
 
     - run:
           name: Set up env variables for codeception symlinking & testing
           command: |
-            echo "export WORDPRESS_DOMAIN="$( hostname -i )"
-                  export WORDPRESS_URL="http://$( hostname -i )"
-                  export SYMLINK_YML="codeception.<< parameters.package_type >>.yml"
-                  export SYMLINK_FOLDER="<< parameters.package_name >>"" >> "$BASH_ENV"
+            echo "export WORDPRESS_DOMAIN=$( hostname -i )
+                  export WORDPRESS_URL=http://$( hostname -i )" >> "$BASH_ENV"
             source "$BASH_ENV"
 
-    # Projects get installed in /var/www/html
+    # Projects get installed in $CIRCLE_WORKING_DIRECTORY
     - when:
           condition:
               equal: [ project, << parameters.package_type >> ]
           steps:
-              - install:
-                    production: false
-                    include-composer: true
-                    include-yarn: true
+              - attach_workspace:
+                    at: .
               - run:
                     name: Move test files to working directory
                     command: |
@@ -94,22 +86,22 @@ steps:
                             mv vendor/wpengine/dxt-tester/lib/codecept "$CIRCLE_WORKING_DIRECTORY"
                         fi
 
-    # Plugins and themes get installed in /home/circleci/project/{name} and symlinked to /var/www/html/wp-content
+    # Plugins and themes get installed in $CIRCLE_WORKING_DIRECTORY/wp-content/{type}s/{name}
     - when:
           condition:
               or:
                   - equal: [ theme, << parameters.package_type >> ]
                   - equal: [ plugin, << parameters.package_type >> ]
           steps:
-              - checkout:
-                    path: /home/circleci/project/<< parameters.package_name >>
-              - compile:
-                    working_directory: /home/circleci/project/<< parameters.package_name >>
+              - attach_workspace:
+                    at: wp-content/<< parameters.package_type >>s/<< parameters.package_name >>
               - run:
                     name: Move test files to working directory
-                    working_directory: /home/circleci/project/<< parameters.package_name >>
                     command: |
-                        mv vendor/wpengine/dxt-tester/lib/codecept "$CIRCLE_WORKING_DIRECTORY"
+                        cd "$PACKAGE_WORKING_DIRECTORY"
+                        if [ -d vendor/wpengine/dxt-tester/lib/codecept ]; then
+                              mv vendor/wpengine/dxt-tester/lib/codecept "$CIRCLE_WORKING_DIRECTORY"
+                        fi
                         mv tests "$CIRCLE_WORKING_DIRECTORY"
 
     # Download and install WordPress
@@ -117,6 +109,7 @@ steps:
           name: Download WordPress
           command: wp core download
 
+    # Add the standard htaccess file, since wp-cli unreliably creates it
     - run:
           name: Create htaccess file
           command: |
@@ -129,6 +122,7 @@ steps:
               RewriteRule . /index.php [L]
               # END WordPress' | tee -a .htaccess > /dev/null
 
+    # Create our wp-config.php file
     - run:
           name: Config WordPress
           command: |
@@ -141,6 +135,11 @@ steps:
                   --dbcharset="$WORDPRESS_DB_CHARSET" \
                   --skip-check
 
+    - run:
+          name: Make sure mysql is available
+          command: dockerize -wait "tcp://$WORDPRESS_DB_HOST:3306" -timeout 1m
+
+    # Install the WP database
     - run:
           name: Install WordPress
           command: |
@@ -171,9 +170,6 @@ steps:
           name: Download codeception dist files
           command: |
               wget -nc -O codeception.dist.yml https://raw.githubusercontent.com/ryanshoover/orb-wpengine-deploy/master/lib/codeception.dist.yml
-              wget -nc -O codeception.plugin.yml https://raw.githubusercontent.com/ryanshoover/orb-wpengine-deploy/master/lib/codeception.plugin.yml
-              wget -nc -O codeception.project.yml https://raw.githubusercontent.com/ryanshoover/orb-wpengine-deploy/master/lib/codeception.project.yml
-              wget -nc -O codeception.theme.yml https://raw.githubusercontent.com/ryanshoover/orb-wpengine-deploy/master/lib/codeception.theme.yml
 
     # Run all our tests, one suite at a time
     - run:
