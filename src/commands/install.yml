@@ -1,0 +1,62 @@
+description: |
+    General setup command. Handles cache, git checkout,
+    composer install, and yarn install.
+
+parameters:
+    production:
+        description: Is this a production build?
+        type: boolean
+        default: false
+    include-composer:
+        description: Should composer skip dependencies?
+        type: boolean
+        default: false
+    include-yarn:
+        description: Should yarn skip dependencies?
+        type: boolean
+        default: false
+
+steps:
+    - checkout
+
+    - when:
+          condition: << parameters.include-composer >>
+          steps:
+              - restore_cache:
+                    keys:
+                        - composer-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum "composer.lock" }}
+              - run:
+                    name: Install composer dependencies
+                    command: composer install <<# parameters.production >> --no-dev <</ parameters.production >> --no-ansi --no-interaction --optimize-autoloader --no-progress --prefer-dist
+
+              - save_cache:
+                    paths:
+                        - ./vendor
+                    key: composer-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum "composer.lock" }}
+
+    - when:
+          condition: << parameters.include-yarn >>
+          steps:
+              - restore_cache:
+                    keys:
+                        - yarn-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum "yarn.lock" }}
+              - run:
+                    name: Add Gemfury registry
+                    command: npm config set @dxt:registry https://npm.fury.io/wpedxt/
+              - run:
+                    name: Add authentication to Gemfury
+                    command: echo "//npm.fury.io/wpedxt/:_authToken=${FURY_AUTH}" > .npmrc
+              - run:
+                    name: Install node dependencies
+                    command: yarn install <<# parameters.production >> --production <</ parameters.production >> --emoji false --no-progress --non-interactive
+              - save_cache:
+                    paths:
+                        - ./node_modules
+                    key: yarn-<< parameters.production >>-{{ .Environment.CACHE_VERSION }}-{{ checksum "yarn.lock" }}
+              - run:
+                    name: Build compiled files
+                    command: |
+                        if jq '.scripts.build' package.json; then
+                            yarn run build
+                        fi
+

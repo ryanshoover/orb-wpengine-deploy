@@ -18,24 +18,28 @@ parameters:
         default: CIRCLE_PROJECT_REPONAME
 
 steps:
-    - attach_workspace:
-          at: .
+    - checkout
+
+    - run:
+          name: Add Fury git repo
+          command: git remote add fury "https://$<< parameters.user >>:$<< parameters.token >>@git.fury.io/$<< parameters.user >>/$<< parameters.project >>.git"
 
     - run:
           name: Check out master branch
           command: git checkout master
 
-    - run:
-          name: Make sure we have production-only composer dependencies
-          command: composer install --no-dev --no-ansi --no-interaction --optimize-autoloader --no-progress --prefer-dist
+    - install:
+          production: true
+          include-composer: true
+          include-yarn: true
 
     - run:
-          name: Make sure we have production-only yarn dependencies
-          command: yarn install --prod --emoji false --no-progress --non-interactive
-
-    - run:
-          name: Add Fury git repo
-          command: git remote add fury "https://$<< parameters.user >>:$<< parameters.token >>@git.fury.io/$<< parameters.user >>/$<< parameters.project >>.git"
+          name: Build compiled files
+          command: |
+              if yarn run --non-interactive | grep -qe "- build"
+              then
+                  yarn run build
+              fi
 
     - gitignoreswap:
           gitignore_type: package
