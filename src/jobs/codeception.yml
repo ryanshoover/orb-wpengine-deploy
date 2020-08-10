@@ -69,7 +69,7 @@ steps:
           name: Set up env variables for codeception symlinking & testing
           command: |
             echo "export WORDPRESS_DOMAIN="$( hostname -i )"
-                  export WORDPRESS_URL="http://$( hostname -i )"
+                  export WORDPRESS_URL="http://$( hostname -i )"" >> "$BASH_ENV"
             source "$BASH_ENV"
 
     # Projects get installed in $CIRCLE_WORKING_DIRECTORY
