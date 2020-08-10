@@ -16,10 +16,16 @@ parameters:
 executor: base
 
 steps:
-    - install:
-          production: true
-          include-composer: true
-          include-yarn: true
+    - attach_workspace:
+          at: .
+
+    - run:
+          name: Make sure we have production-only composer dependencies
+          command: composer install --no-dev --no-ansi --no-interaction --optimize-autoloader --no-progress --prefer-dist
+
+    - run:
+          name: Make sure we have production-only yarn dependencies
+          command: yarn install --prod --emoji false --no-progress --non-interactive
 
     # Add the git.wpengine.com fingerprint to our known hosts
     # We need to interact with this server. And the unknown host will trigger an interactive prompt.

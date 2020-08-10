@@ -1,0 +1,57 @@
+description: |
+    Install and build the project, plugin, or theme.
+
+executor: base
+
+steps:
+    - checkout
+
+    # Install Composer
+    - restore_cache:
+        keys:
+            - composer-{{ .Environment.CACHE_VERSION }}-{{ checksum "composer.lock" }}
+    - run:
+        name: Install composer dependencies
+        command: composer install --no-ansi --no-interaction --optimize-autoloader --no-progress --prefer-dist
+
+    - save_cache:
+        paths:
+            - "./vendor"
+        key: composer-{{ .Environment.CACHE_VERSION }}-{{ checksum "composer.lock" }}
+
+    # Set up Gemfury
+    - run:
+        name: Add Gemfury registry
+        command: npm config set @dxt:registry "https://npm.fury.io/wpedxt/"
+
+    - run:
+        name: Add authentication to Gemfury
+        command: echo "//npm.fury.io/wpedxt/:_authToken=${FURY_AUTH}" > .npmrc
+
+    # Install Yarn
+    - restore_cache:
+        keys:
+            - yarn-{{ .Environment.CACHE_VERSION }}-{{ checksum "yarn.lock" }}
+
+    - run:
+        name: Install node dependencies
+        command: yarn install --emoji false --no-progress --non-interactive
+
+    - save_cache:
+        paths:
+            - "./node_modules"
+        key: yarn-{{ .Environment.CACHE_VERSION }}-{{ checksum "yarn.lock" }}
+
+    # Run yarn build
+    - run:
+        name: Build compiled files
+        command: |
+            if jq '.scripts.build' package.json; then
+                yarn run build
+            fi
+
+    # Save to workspace
+    - persist_to_workspace:
+        root: .
+        paths:
+            - ./*
