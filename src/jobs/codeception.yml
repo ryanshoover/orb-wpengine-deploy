@@ -171,9 +171,6 @@ steps:
           name: Download codeception dist files
           command: |
               wget -nc -O codeception.dist.yml https://raw.githubusercontent.com/ryanshoover/orb-wpengine-deploy/master/lib/codeception.dist.yml
-              wget -nc -O codeception.plugin.yml https://raw.githubusercontent.com/ryanshoover/orb-wpengine-deploy/master/lib/codeception.plugin.yml
-              wget -nc -O codeception.project.yml https://raw.githubusercontent.com/ryanshoover/orb-wpengine-deploy/master/lib/codeception.project.yml
-              wget -nc -O codeception.theme.yml https://raw.githubusercontent.com/ryanshoover/orb-wpengine-deploy/master/lib/codeception.theme.yml
 
     # Run all our tests, one suite at a time
     - run:

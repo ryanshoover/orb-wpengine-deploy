@@ -1,8 +1,0 @@
-extensions:
-    enabled:
-        - tad\WPBrowser\Extension\Symlinker
-    config:
-        tad\WPBrowser\Extension\Symlinker:
-            mode: "theme"
-            destination: "/home/circleci/project/wp-content/themes"
-            rootFolder: "/home/circleci/project/%SYMLINK_FOLDER%"
