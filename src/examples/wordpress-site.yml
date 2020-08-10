@@ -13,75 +13,57 @@ usage:
 
         build_test_deploy:
             jobs:
-                - wpengine/build:
-                    context: my-context
+                - wpengine/lint
+                - wpengine/codeception
 
-                - wpengine/lint:
-                    context: my-context
-                    requires:
-                        - wpengine/build
+                - wpengine/build_deploy:
+                      name: deploy-development
+                      environment: development
+                      requires:
+                          - wpengine/lint
+                          - wpengine/codeception
+                      filters:
+                          branches:
+                              only: development
 
-                - wpengine/codeception:
-                    context: my-context
-                    requires:
-                        - wpengine/build
+                - wpengine/build_deploy:
+                      name: deploy-staging
+                      environment: staging
+                      requires:
+                          - wpengine/lint
+                          - wpengine/codeception
+                      filters:
+                          branches:
+                              only: staging
 
-                - wpengine/deploy_site:
-                    context: my-context
-                    name: deploy-development
-                    environment: development
-                    requires:
-                        - wpengine/lint
-                        - wpengine/codeception
-                    filters:
-                        branches:
-                            only: development
+                - wpengine/build_deploy:
+                      name: deploy-production
+                      environment: production
+                      requires:
+                          - wpengine/lint
+                          - wpengine/codeception
+                      filters:
+                          branches:
+                              only:
+                                  - master
+                                  - production
 
-                - wpengine/deploy_site:
-                    context: my-context
-                    name: deploy-staging
-                    environment: staging
-                    requires:
-                        - wpengine/lint
-                        - wpengine/codeception
-                    filters:
-                        branches:
-                            only: staging
-
-                - wpengine/deploy_site:
-                    context: my-context
-                    name: deploy-production
-                    environment: production
-                    requires:
-                        - wpengine/lint
-                        - wpengine/codeception
-                    filters:
-                        branches:
-                            only:
-                                - master
-                                - production
-
-                - wpengine/deploy_site:
-                    context: my-context
-                    name: deploy-feature
-                    environment: thenameofmyfeatureinstall
-                    requires:
-                        - wpengine/lint
-                        - wpengine/codeception
-                    filters:
-                        branches:
-                            only:
-                                - /feat-.*/
+                - wpengine/build_deploy:
+                      name: deploy-feature
+                      environment: thenameofmyfeatureinstall
+                      requires:
+                          - wpengine/lint
+                          - wpengine/codeception
+                      filters:
+                          branches:
+                              only:
+                                  - /feat-.*/
 
         regression:
             jobs:
                 - wpengine/backstop:
-                    config: tests/_backstop/index.js
-                    context: my-context
-                    filters:
-                        branches:
-                            only:
-                                - development
-                                - staging
-                                - master
-                                - production
+                      config: tests/_backstop/index.js
+                      filters:
+                          branches:
+                              only:
+                                  - staging

@@ -62,3 +62,4 @@ modules:
             port: 4444
             browser: chrome
             start: true
+extends: "%SYMLINK_YML%"
