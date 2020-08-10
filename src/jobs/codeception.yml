@@ -86,8 +86,7 @@ steps:
                             mv vendor/wpengine/dxt-tester/lib/codecept "$CIRCLE_WORKING_DIRECTORY"
                         fi
 
-    # Plugins and themes get installed in $CIRCLE_WORKING_DIRECTORY/{name}
-    # and symlinked to $CIRCLE_WORKING_DIRECTORY/wp-content/[plugins|themes]/{name}
+    # Plugins and themes get installed in $CIRCLE_WORKING_DIRECTORY/wp-content/{type}s/{name}
     - when:
           condition:
               or:
