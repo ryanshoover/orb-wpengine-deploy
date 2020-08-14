@@ -14,42 +14,16 @@ usage:
 
         test-deploy:
             jobs:
-                - wpengine/build:
-                    context: my-context
-                    filters:
-                        branches:
-                            only: /.*/
-                        tags:
-                            only: /^\d+\.\d+\.\d+$/
-
-                - wpengine/lint:
-                    context: my-context
-                    requires:
-                        - wpengine/build
-                    filters:
-                        branches:
-                            only: /.*/
-                        tags:
-                            only: /^\d+\.\d+\.\d+$/
-
-
-                - wpengine/codeception:
-                    context: my-context
-                    requires:
-                        - wpengine/build
-                    filters:
-                        branches:
-                            only: /.*/
-                        tags:
-                            only: /^\d+\.\d+\.\d+$/
-
+                - wpengine/lint
+                - wpengine/packageCodeception:
+                      package_type: plugin
+                      package_name: my-custom-plugin
                 - wpengine/deploy_fury:
-                    context: my-context
-                    requires:
-                        - wpengine/lint
-                        - wpengine/codeception
-                    filters:
-                        branches:
-                            ignore: /.*/
-                        tags:
-                            only: /^\d+\.\d+\.\d+$/
+                      requires:
+                          - wpengine/lint
+                          - wpengine/packageCodeception
+                      filters:
+                          tags:
+                              only: /^\d+\.\d+\.\d+$/
+                          branches:
+                              ignore: /.*/

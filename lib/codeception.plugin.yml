@@ -4,5 +4,5 @@ extensions:
     config:
         tad\WPBrowser\Extension\Symlinker:
             mode: "plugin"
-            destination: "/home/circleci/project/wp-content/plugins"
+            destination: "/var/www/html/wp-content/plugins"
             rootFolder: "/home/circleci/project/%SYMLINK_FOLDER%"
