@@ -61,8 +61,15 @@ steps:
                   AllowOverride All
                   Require all granted
             </Directory>" | sudo tee -a /etc/apache2/conf-available/localhost.conf > /dev/null
+
+            echo "<VirtualHost *:80>
+                  DocumentRoot ${CIRCLE_WORKING_DIRECTORY}
+            </VirtualHost>" | sudo tee -a /etc/apache2/sites-available/localhost.conf > /dev/null
+
             sudo a2enmod rewrite
             sudo a2enconf localhost
+            sudo a2ensite localhost
+            sudo a2dissite 000-default
             sudo service apache2 restart
 
     - run:
