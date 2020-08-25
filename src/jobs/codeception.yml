@@ -108,10 +108,10 @@ steps:
                   - equal: [ plugin, << parameters.package_type >> ]
           steps:
               - attach_workspace:
-                    at: /var/www/html/wp-content/<< parameters.package_type >>/<< parameters.package_name >>
+                    at: /var/www/html/wp-content/<< parameters.package_type >>s/<< parameters.package_name >>
               - run:
                     name: Move test files to working directory
-                    working_directory: /var/www/html/wp-content/<< parameters.package_type >>/<< parameters.package_name >>
+                    working_directory: /var/www/html/wp-content/<< parameters.package_type >>s/<< parameters.package_name >>
                     command: |
                         if [ -d vendor/wpengine/dxt-tester/lib/codecept ]; then
                               mv vendor/wpengine/dxt-tester/lib/codecept "$CIRCLE_WORKING_DIRECTORY"
