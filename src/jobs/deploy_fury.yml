@@ -30,18 +30,18 @@ steps:
           command: git checkout master
 
     - run:
-        name: Install production composer dependencies
-        command:
-            if [ -f composer.lock ]; then
-                composer install --no-dev --no-ansi --no-interaction --no-progress --optimize-autoloader --prefer-dist
-            fi
+          name: Install production composer dependencies
+          command:
+              if [ -f composer.lock ]; then
+                  composer install --no-dev --no-ansi --no-interaction --no-progress --optimize-autoloader --prefer-dist
+              fi
 
     - run:
-        name: Install production yarn dependencies
-        command:
-            if [ -f yarn.lock ]; then
-                yarn install --production --emoji false --non-interactive
-            fi
+          name: Install production yarn dependencies
+          command:
+              if [ -f yarn.lock ]; then
+                  yarn install --production --emoji false --non-interactive
+              fi
 
     - gitignoreswap:
           gitignore_type: package

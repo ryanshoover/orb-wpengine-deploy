@@ -20,33 +20,33 @@ steps:
           key: composer-{{ .Environment.CACHE_VERSION }}-{{ checksum "composer.lock" }}
 
     - restore_cache:
-        keys:
-            - yarn-{{ .Environment.CACHE_VERSION }}-{{ checksum "yarn.lock" }}
+          keys:
+              - yarn-{{ .Environment.CACHE_VERSION }}-{{ checksum "yarn.lock" }}
 
     - run:
-        name: Add Gemfury registry
-        command: npm config set @dxt:registry https://npm.fury.io/wpedxt/
+          name: Add Gemfury registry
+          command: npm config set @dxt:registry https://npm.fury.io/wpedxt/
     - run:
-        name: Add authentication to Gemfury
-        command: echo "//npm.fury.io/wpedxt/:_authToken=${FURY_AUTH}" > .npmrc
+          name: Add authentication to Gemfury
+          command: echo "//npm.fury.io/wpedxt/:_authToken=${FURY_AUTH}" > .npmrc
     - run:
-        name: Install node dependencies
-        command: |
-            if [ -f yarn.lock ]; then
-                yarn install --emoji false --non-interactive
-            fi
+          name: Install node dependencies
+          command: |
+              if [ -f yarn.lock ]; then
+                  yarn install --emoji false --non-interactive
+              fi
     - save_cache:
-        paths:
-            - ./node_modules
-        key: yarn-{{ .Environment.CACHE_VERSION }}-{{ checksum "yarn.lock" }}
+          paths:
+              - ./node_modules
+          key: yarn-{{ .Environment.CACHE_VERSION }}-{{ checksum "yarn.lock" }}
     - run:
-        name: Build compiled files
-        command: |
-            if jq '.scripts.build' package.json; then
-                yarn run build
-            fi
+          name: Build compiled files
+          command: |
+              if jq '.scripts.build' package.json; then
+                  yarn run build
+              fi
 
     - persist_to_workspace:
-        root: /home/circleci
-        paths:
-            - project
+          root: /home/circleci
+          paths:
+              - project
