@@ -13,7 +13,33 @@ parameters:
         type: string
         default: project
 
-executor: wp-browser
+docker:
+    - image: cimg/php:7.4-node
+      environment:
+          DOCKERIZE_VERSION: v0.6.1
+          WORDPRESS_DB_HOST: mysql
+          WORDPRESS_DB_USER: wordpress
+          WORDPRESS_DB_PASSWORD: wordpress
+          WORDPRESS_DB_NAME: wordpress
+          WORDPRESS_DB_CHARSET: utf8
+          WORDPRESS_ROOT_FOLDER: /home/circleci/project
+          WORDPRESS_DOMAIN: localhost
+          WORDPRESS_URL: http://localhost
+          WORDPRESS_TABLE_PREFIX: wp_
+          WORDPRESS_ADMIN_EMAIL: admin@wp.local
+          WORDPRESS_ADMIN_USERNAME: admin
+          WORDPRESS_ADMIN_PASSWORD: password
+
+    - image: circleci/mysql:5
+      name: mysql
+      environment:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: wordpress
+          MYSQL_USER: wordpress
+          MYSQL_PASSWORD: wordpress
+
+    - image: selenium/standalone-chrome
+      name: webdriver
 
 steps:
     - run:
@@ -55,49 +81,41 @@ steps:
     - run:
           name: Set up Apache
           command: |
-            echo "ServerName localhost
-            <Directory /var/www/html>
-                  Options Indexes FollowSymLinks
-                  AllowOverride All
-                  Require all granted
-            </Directory>" | sudo tee -a /etc/apache2/conf-available/localhost.conf > /dev/null
+              echo "ServerName localhost
+              <Directory ${CIRCLE_WORKING_DIRECTORY}>
+                    Options Indexes FollowSymLinks
+                    AllowOverride All
+                    Require all granted
+              </Directory>" | sudo tee -a /etc/apache2/conf-available/localhost.conf > /dev/null
 
-            echo "<VirtualHost *:80>
-                  DocumentRoot ${CIRCLE_WORKING_DIRECTORY}
-            </VirtualHost>" | sudo tee -a /etc/apache2/sites-available/localhost.conf > /dev/null
+              echo "<VirtualHost *:80>
+                    DocumentRoot ${CIRCLE_WORKING_DIRECTORY}
+              </VirtualHost>" | sudo tee -a /etc/apache2/sites-available/localhost.conf > /dev/null
 
-            sudo a2enmod rewrite
-            sudo a2enconf localhost
-            sudo a2ensite localhost
-            sudo a2dissite 000-default
-            sudo service apache2 restart
-            sudo chown circleci /var/www/html
-            sudo rm -rf /var/www/html/*
+              sudo a2enmod rewrite
+              sudo a2enconf localhost
+              sudo a2ensite localhost
+              sudo a2dissite 000-default
+              sudo service apache2 restart
 
     - run: dockerize -wait "tcp://$WORDPRESS_DB_HOST:3306" -timeout 1m
 
     - run:
-          name: Set up env variables for codeception symlinking & testing
-          command: |
-            echo "export WORDPRESS_DOMAIN=$( hostname -i ); export WORDPRESS_URL=http://$( hostname -i )" >> "$BASH_ENV"
-            source "$BASH_ENV"
+          name: Set up env variables for codeception testing
+          command: echo "export WORDPRESS_DOMAIN=$( hostname -i ); export WORDPRESS_URL=http://$( hostname -i )" >> "$BASH_ENV"
 
-    # Projects get installed in /var/www/html
+    # Projects get installed in the CircleCI working directory
     - when:
           condition:
               equal: [ project, << parameters.package_type >> ]
           steps:
               - attach_workspace:
-                    at: /var/www/html
-
+                    at: /home/circleci/project
               - run:
-                    name: Move test files to working directory
-                    command: |
-                        if [ -d vendor/wpengine/dxt-tester/lib/codecept ]; then
-                            mv vendor/wpengine/dxt-tester/lib/codecept "$CIRCLE_WORKING_DIRECTORY"
-                        fi
+                    name: Set up tests directory
+                    command: echo "export CODECEPT_DIRECTORY=$CIRCLE_WORKING_DIRECTORY" >> "$BASH_ENV"
 
-    # Plugins and themes get installed in /home/circleci/project/{name} and symlinked to /var/www/html/wp-content
+    # Plugins and themes get installed in /home/circleci/project/wp-content/
     - when:
           condition:
               or:
@@ -105,20 +123,10 @@ steps:
                   - equal: [ plugin, << parameters.package_type >> ]
           steps:
               - attach_workspace:
-                    at: /var/www/html/wp-content/<< parameters.package_type >>s/<< parameters.package_name >>
+                    at: /home/circleci/project/<< parameters.package_type >>s/<< parameters.package_name >>
               - run:
-                    name: Move test files to working directory
-                    working_directory: /var/www/html/wp-content/<< parameters.package_type >>s/<< parameters.package_name >>
-                    command: |
-                        if [ -d vendor/wpengine/dxt-tester/lib/codecept ]; then
-                              mv vendor/wpengine/dxt-tester/lib/codecept "$CIRCLE_WORKING_DIRECTORY"
-                        fi
-                        if [ -d tests ]; then
-                              mv tests "$CIRCLE_WORKING_DIRECTORY"
-                        fi
-                        if [ -f codeception.* ]; then
-                              mv codeception.* "$CIRCLE_WORKING_DIRECTORY"
-                        fi
+                    name: Set up tests directory
+                    command: echo "export CODECEPT_DIRECTORY=$CIRCLE_WORKING_DIRECTORY/<< parameters.package_type >>s/<< parameters.package_name >>" >> "$BASH_ENV"
 
     # Download and install WordPress
     - run:
@@ -183,20 +191,20 @@ steps:
     # Run all our tests, one suite at a time
     - run:
           name: Run Codeception acceptance tests
-          command: codecept run acceptance --xml="$CIRCLE_WORKING_DIRECTORY/test-results/acceptance/results.xml"
+          command: cd $CODECEPT_DIRECTORY; codecept run acceptance --xml="$CIRCLE_WORKING_DIRECTORY/test-results/acceptance/results.xml" --no-interaction
     - run:
           name: Run Codeception functional tests
-          command: codecept run functional --xml="$CIRCLE_WORKING_DIRECTORY/test-results/functional/results.xml"
+          command: cd $CODECEPT_DIRECTORY; codecept run functional --xml="$CIRCLE_WORKING_DIRECTORY/test-results/functional/results.xml" --no-interaction
     - run:
           name: Run Codeception unit tests
-          command: codecept run unit --xml="$CIRCLE_WORKING_DIRECTORY/test-results/unit/results.xml"
+          command: cd $CODECEPT_DIRECTORY; codecept run unit --xml="$CIRCLE_WORKING_DIRECTORY/test-results/unit/results.xml" --no-interaction
     - run:
           name: Run Codeception wpunit tests
-          command: codecept run wpunit --xml="$CIRCLE_WORKING_DIRECTORY/test-results/wpunit/results.xml"
+          command: cd $CODECEPT_DIRECTORY; codecept run wpunit --xml="$CIRCLE_WORKING_DIRECTORY/test-results/wpunit/results.xml" --no-interaction
 
     # Save the results
     - store_test_results:
           path: test-results
 
     - store_artifacts:
-          path: tests/_output
+          path: test-results

@@ -1,10 +1,10 @@
 actor: Tester
 paths:
     tests: tests
-    log: tests/_output
-    data: codecept/_data
-    support: codecept/_support
-    envs: codecept/_envs
+    log: /home/circleci/project/test-results
+    data: tests/_data
+    envs: tests/_envs
+    support: vendor/wpengine/dxt-tester/lib/codecept/_support
 params:
     - env
     - .env
