@@ -1,6 +1,8 @@
 description: |
     Build a plugin, theme, or site. Installs composer and yarn dependencies. Runs yarn build command.
 
+executor: php
+
 steps:
     - checkout
 
