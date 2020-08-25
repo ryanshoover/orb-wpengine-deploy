@@ -191,16 +191,16 @@ steps:
     # Run all our tests, one suite at a time
     - run:
           name: Run Codeception acceptance tests
-          command: cd $CODECEPT_DIRECTORY; codecept run acceptance --xml="$CIRCLE_WORKING_DIRECTORY/test-results/acceptance/results.xml" --no-interaction
+          command: cd "$CODECEPT_DIRECTORY" && codecept run acceptance --xml="$CIRCLE_WORKING_DIRECTORY/test-results/acceptance/results.xml" --no-interaction
     - run:
           name: Run Codeception functional tests
-          command: cd $CODECEPT_DIRECTORY; codecept run functional --xml="$CIRCLE_WORKING_DIRECTORY/test-results/functional/results.xml" --no-interaction
+          command: cd "$CODECEPT_DIRECTORY" && codecept run functional --xml="$CIRCLE_WORKING_DIRECTORY/test-results/functional/results.xml" --no-interaction
     - run:
           name: Run Codeception unit tests
-          command: cd $CODECEPT_DIRECTORY; codecept run unit --xml="$CIRCLE_WORKING_DIRECTORY/test-results/unit/results.xml" --no-interaction
+          command: cd "$CODECEPT_DIRECTORY" && codecept run unit --xml="$CIRCLE_WORKING_DIRECTORY/test-results/unit/results.xml" --no-interaction
     - run:
           name: Run Codeception wpunit tests
-          command: cd $CODECEPT_DIRECTORY; codecept run wpunit --xml="$CIRCLE_WORKING_DIRECTORY/test-results/wpunit/results.xml" --no-interaction
+          command: cd "$CODECEPT_DIRECTORY" && codecept run wpunit --xml="$CIRCLE_WORKING_DIRECTORY/test-results/wpunit/results.xml" --no-interaction
 
     # Save the results
     - store_test_results:
