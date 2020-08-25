@@ -1,10 +1,10 @@
 actor: Tester
 paths:
     tests: tests
-    log: tests/_output
-    data: codecept/_data
-    support: codecept/_support
-    envs: codecept/_envs
+    log: /home/circleci/project/test-results
+    data: tests/_data
+    envs: tests/_envs
+    support: vendor/wpengine/dxt-tester/lib/codecept/_support
 params:
     - env
     - .env
@@ -38,7 +38,7 @@ modules:
             password: '%WORDPRESS_DB_PASSWORD%'
             url: '%WORDPRESS_URL%'
             populator: 'mysql -u $user -p$password -h $host $dbname < $dump'
-            dump: wp-content/mysql.sql
+            dump: '%WORDPRESS_ROOT_FOLDER%/wp-content/mysql.sql'
             populate: true
             cleanup: true
             urlReplacement: true
