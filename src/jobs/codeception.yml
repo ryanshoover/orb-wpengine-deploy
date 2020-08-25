@@ -50,7 +50,7 @@ steps:
     - save_cache:
           key: installwpbrowser
           paths:
-              - ~/.composer/vendor/
+              - ~/.composer
 
     - run:
           name: Set up Apache
