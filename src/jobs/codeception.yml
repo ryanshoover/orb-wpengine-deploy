@@ -79,10 +79,8 @@ steps:
     - run:
           name: Set up env variables for codeception symlinking & testing
           command: |
-            echo "export WORDPRESS_DOMAIN="$( hostname -i )"
-                  export WORDPRESS_URL="http://$( hostname -i )"
-                  export SYMLINK_YML="codeception.<< parameters.package_type >>.yml"
-                  export SYMLINK_FOLDER="<< parameters.package_name >>"" >> "$BASH_ENV"
+            echo "export WORDPRESS_DOMAIN=$( hostname -i )
+                  export WORDPRESS_URL=http://$( hostname -i ) >> "$BASH_ENV"
             source "$BASH_ENV"
 
     # Projects get installed in /var/www/html
