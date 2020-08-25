@@ -13,10 +13,17 @@ usage:
 
         build_test_deploy:
             jobs:
-                - wpengine/lint
-                - wpengine/codeception
+                - wpengine/build
 
-                - wpengine/build_deploy:
+                - wpengine/lint:
+                      requires:
+                          - wpengine/build
+
+                - wpengine/codeception:
+                      requires:
+                          - wpengine/build
+
+                - wpengine/deploy_site:
                       name: deploy-development
                       environment: development
                       requires:
@@ -26,7 +33,7 @@ usage:
                           branches:
                               only: development
 
-                - wpengine/build_deploy:
+                - wpengine/deploy_site:
                       name: deploy-staging
                       environment: staging
                       requires:
@@ -36,7 +43,7 @@ usage:
                           branches:
                               only: staging
 
-                - wpengine/build_deploy:
+                - wpengine/deploy_site:
                       name: deploy-production
                       environment: production
                       requires:
@@ -48,7 +55,7 @@ usage:
                                   - master
                                   - production
 
-                - wpengine/build_deploy:
+                - wpengine/deploy_site:
                       name: deploy-feature
                       environment: thenameofmyfeatureinstall
                       requires:

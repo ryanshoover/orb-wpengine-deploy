@@ -14,14 +14,22 @@ usage:
 
         test-deploy:
             jobs:
-                - wpengine/lint
-                - wpengine/packageCodeception:
+                - wpengine/build
+
+                - wpengine/lint:
+                      requires:
+                          - wpengine/build
+
+                - wpengine/codeception:
                       package_type: plugin
                       package_name: my-custom-plugin
+                      requires:
+                          - wpengine/build
+
                 - wpengine/deploy_fury:
                       requires:
                           - wpengine/lint
-                          - wpengine/packageCodeception
+                          - wpengine/codeception
                       filters:
                           tags:
                               only: /^\d+\.\d+\.\d+$/

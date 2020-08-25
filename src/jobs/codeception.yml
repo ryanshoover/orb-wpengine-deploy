@@ -90,10 +90,9 @@ steps:
           condition:
               equal: [ project, << parameters.package_type >> ]
           steps:
-              - install:
-                    production: false
-                    include-composer: true
-                    include-yarn: true
+              - attach_workspace:
+                    at: /var/www/html
+
               - run:
                     name: Move test files to working directory
                     command: |
@@ -108,16 +107,18 @@ steps:
                   - equal: [ theme, << parameters.package_type >> ]
                   - equal: [ plugin, << parameters.package_type >> ]
           steps:
-              - checkout:
-                    path: /home/circleci/project/<< parameters.package_name >>
-              - compile:
-                    working_directory: /home/circleci/project/<< parameters.package_name >>
+              - attach_workspace:
+                    at: /var/www/html/wp-content/<< parameters.package_type >>/<< parameters.package_name >>
               - run:
                     name: Move test files to working directory
-                    working_directory: /home/circleci/project/<< parameters.package_name >>
+                    working_directory: /var/www/html/wp-content/<< parameters.package_type >>/<< parameters.package_name >>
                     command: |
-                        mv vendor/wpengine/dxt-tester/lib/codecept "$CIRCLE_WORKING_DIRECTORY"
-                        mv tests "$CIRCLE_WORKING_DIRECTORY"
+                        if [ -d vendor/wpengine/dxt-tester/lib/codecept ]; then
+                              mv vendor/wpengine/dxt-tester/lib/codecept "$CIRCLE_WORKING_DIRECTORY"
+                        fi
+                        if [ -d tests ]; then
+                              mv tests "$CIRCLE_WORKING_DIRECTORY"
+                        fi
 
     # Download and install WordPress
     - run:
@@ -178,9 +179,6 @@ steps:
           name: Download codeception dist files
           command: |
               wget -nc -O codeception.dist.yml https://raw.githubusercontent.com/ryanshoover/orb-wpengine-deploy/master/lib/codeception.dist.yml
-              wget -nc -O codeception.plugin.yml https://raw.githubusercontent.com/ryanshoover/orb-wpengine-deploy/master/lib/codeception.plugin.yml
-              wget -nc -O codeception.project.yml https://raw.githubusercontent.com/ryanshoover/orb-wpengine-deploy/master/lib/codeception.project.yml
-              wget -nc -O codeception.theme.yml https://raw.githubusercontent.com/ryanshoover/orb-wpengine-deploy/master/lib/codeception.theme.yml
 
     # Run all our tests, one suite at a time
     - run:
