@@ -119,6 +119,9 @@ steps:
                         if [ -d tests ]; then
                               mv tests "$CIRCLE_WORKING_DIRECTORY"
                         fi
+                        if [ -f codeception.* ]; then
+                              mv codeception.* "$CIRCLE_WORKING_DIRECTORY"
+                        fi
 
     # Download and install WordPress
     - run:
