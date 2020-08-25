@@ -180,13 +180,11 @@ steps:
                   --allow-root
 
     # Make sure .env exists in case the config depends on it
-    - run: touch .env
+    - run: touch "$CODECEPT_DIRECTORY/.env"
 
-    # Get base codeception dist files from the repo
     - run:
           name: Download codeception dist files
-          command: |
-              wget -nc -O codeception.dist.yml https://raw.githubusercontent.com/ryanshoover/orb-wpengine-deploy/master/lib/codeception.dist.yml
+          command: wget -nc -P "$CODECEPT_DIRECTORY" https://raw.githubusercontent.com/ryanshoover/orb-wpengine-deploy/master/lib/codeception.dist.yml
 
     # Run all our tests, one suite at a time
     - run:
