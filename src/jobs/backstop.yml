@@ -1,9 +1,13 @@
 description: Run visual regression tests using backstopjs
+
 parameters:
     config:
         description: Path to the backstop config file
         type: string
-executor: backstop
+
+docker:
+    - image: backstopjs/backstopjs
+
 steps:
     - checkout
 

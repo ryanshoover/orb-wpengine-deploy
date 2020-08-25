@@ -1,7 +1,7 @@
 description: |
     Deploy a PHP, Node, or Ruby package to a Gemfury repository. Designed to be run on new GitHub releases.
 
-executor: base
+executor: php
 
 parameters:
     user:
@@ -18,7 +18,8 @@ parameters:
         default: CIRCLE_PROJECT_REPONAME
 
 steps:
-    - checkout
+    - attach_workspace:
+          at: /home/circleci/project
 
     - run:
           name: Add Fury git repo
@@ -28,17 +29,18 @@ steps:
           name: Check out master branch
           command: git checkout master
 
-    - install:
-          production: true
-          include-composer: true
-          include-yarn: true
+    - run:
+          name: Install production composer dependencies
+          command: |
+              if [ -f composer.lock ]; then
+                  composer install --no-dev --no-ansi --no-interaction --no-progress --optimize-autoloader --prefer-dist
+              fi
 
     - run:
-          name: Build compiled files
+          name: Install production yarn dependencies
           command: |
-              if yarn run --non-interactive | grep -qe "- build"
-              then
-                  yarn run build
+              if [ -f yarn.lock ]; then
+                  yarn install --production --emoji false --non-interactive
               fi
 
     - gitignoreswap:

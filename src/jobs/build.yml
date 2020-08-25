@@ -1,0 +1,54 @@
+description: |
+    Build a plugin, theme, or site. Installs composer and yarn dependencies. Runs yarn build command.
+
+executor: php
+
+steps:
+    - checkout
+
+    - restore_cache:
+          keys:
+              - composer-{{ .Environment.CACHE_VERSION }}-{{ checksum "composer.lock" }}
+    - run:
+          name: Install composer dependencies
+          command: |
+            if [ -f composer.lock ]; then
+                composer install --no-ansi --no-interaction --no-progress --optimize-autoloader --prefer-dist
+            fi
+
+    - save_cache:
+          paths:
+              - ./vendor
+          key: composer-{{ .Environment.CACHE_VERSION }}-{{ checksum "composer.lock" }}
+
+    - restore_cache:
+          keys:
+              - yarn-{{ .Environment.CACHE_VERSION }}-{{ checksum "yarn.lock" }}
+
+    - run:
+          name: Add Gemfury registry
+          command: npm config set @dxt:registry https://npm.fury.io/wpedxt/
+    - run:
+          name: Add authentication to Gemfury
+          command: echo "//npm.fury.io/wpedxt/:_authToken=${FURY_AUTH}" > .npmrc
+    - run:
+          name: Install node dependencies
+          command: |
+              if [ -f yarn.lock ]; then
+                  yarn install --emoji false --non-interactive
+              fi
+    - save_cache:
+          paths:
+              - ./node_modules
+          key: yarn-{{ .Environment.CACHE_VERSION }}-{{ checksum "yarn.lock" }}
+    - run:
+          name: Build compiled files
+          command: |
+              if jq '.scripts.build' package.json; then
+                  yarn run build
+              fi
+
+    - persist_to_workspace:
+          root: /home/circleci/project
+          paths:
+              - .
