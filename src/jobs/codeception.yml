@@ -41,6 +41,8 @@ docker:
     - image: selenium/standalone-chrome
       name: webdriver
 
+working_directory: /home/circleci/project
+
 steps:
     - run:
           name: Install apt needs
@@ -123,10 +125,10 @@ steps:
                   - equal: [ plugin, << parameters.package_type >> ]
           steps:
               - attach_workspace:
-                    at: /home/circleci/project/<< parameters.package_type >>s/<< parameters.package_name >>
+                    at: /home/circleci/project/wp-content/<< parameters.package_type >>s/<< parameters.package_name >>
               - run:
                     name: Set up tests directory
-                    command: echo "export CODECEPT_DIRECTORY=$CIRCLE_WORKING_DIRECTORY/<< parameters.package_type >>s/<< parameters.package_name >>" >> "$BASH_ENV"
+                    command: echo "export CODECEPT_DIRECTORY=$CIRCLE_WORKING_DIRECTORY/wp-content/<< parameters.package_type >>s/<< parameters.package_name >>" >> "$BASH_ENV"
 
     # Download and install WordPress
     - run:

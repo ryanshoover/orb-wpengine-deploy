@@ -38,7 +38,7 @@ modules:
             password: '%WORDPRESS_DB_PASSWORD%'
             url: '%WORDPRESS_URL%'
             populator: 'mysql -u $user -p$password -h $host $dbname < $dump'
-            dump: wp-content/mysql.sql
+            dump: '%WORDPRESS_ROOT_FOLDER%/wp-content/mysql.sql'
             populate: true
             cleanup: true
             urlReplacement: true
