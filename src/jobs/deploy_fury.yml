@@ -42,11 +42,13 @@ steps:
                   composer install --no-dev --no-ansi --no-interaction --no-progress --optimize-autoloader --prefer-dist
               fi
 
+    # npm prune --production to clean out devDependencies
+    # See https://github.com/yarnpkg/yarn/issues/696
     - run:
           name: Install production yarn dependencies
           command: |
               if [ -f yarn.lock ]; then
-                  yarn install --production --emoji false --non-interactive
+                  npm prune --production
               fi
 
     - gitignoreswap:
