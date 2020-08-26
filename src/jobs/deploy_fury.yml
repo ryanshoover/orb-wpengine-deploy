@@ -60,5 +60,5 @@ steps:
               fi
 
     - deploy:
-          name: Deploy to GemFury
-          command: git push fury master --tags
+            name: Deploy to GemFury
+            command: git push fury master --tags --force
