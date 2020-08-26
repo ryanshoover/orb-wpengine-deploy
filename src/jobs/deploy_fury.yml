@@ -55,7 +55,7 @@ steps:
     - run:
           name: Rewrite tag with compiled files
           command: |
-              if [[ -z "${CIRCLE_TAG}" ]]; then
+              if [[ ! -z "${CIRCLE_TAG}" ]]; then
                 git tag -f -m "Fury deployment compiled" "$CIRCLE_TAG"
               fi
 
