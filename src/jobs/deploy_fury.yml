@@ -22,6 +22,12 @@ steps:
           at: /home/circleci/project
 
     - run:
+          name: Set up git
+          command: |
+              git config --global user.email "deploy@circleci.local"
+              git config --global user.name "$CIRCLE_PROJECT_REPONAME"
+
+    - run:
           name: Add Fury git repo
           command: git remote add fury "https://$<< parameters.user >>:$<< parameters.token >>@git.fury.io/$<< parameters.user >>/$<< parameters.project >>.git"
 
