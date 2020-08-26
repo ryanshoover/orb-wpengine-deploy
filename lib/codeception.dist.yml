@@ -4,7 +4,7 @@ paths:
     log: /home/circleci/project/test-results
     data: tests/_data
     envs: tests/_envs
-    support: vendor/wpengine/dxt-tester/lib/codecept/_support
+    support: codecept/_support
 params:
     - env
     - .env
