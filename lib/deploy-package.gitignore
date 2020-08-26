@@ -2,6 +2,8 @@
 .editorconfig
 .github
 .nvmrc
+.npmrc
+.circleci
 
 # Node dependency files
 /node_modules/
@@ -11,6 +13,7 @@ auth.json
 /src/
 
 # Test files
+codeception.*
 /tests/
 
 # Mac-specific files
