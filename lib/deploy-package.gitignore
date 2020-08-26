@@ -4,10 +4,14 @@
 .nvmrc
 .npmrc
 .circleci
+.eslint*
+webpack*
+.circleci
 
 # Node dependency files
 /node_modules/
 auth.json
+yarn-error.log
 
 # Source files
 /src/

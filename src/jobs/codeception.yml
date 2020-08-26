@@ -189,6 +189,13 @@ steps:
           name: Download codeception dist files
           command: wget -nc -P "$CODECEPT_DIRECTORY" https://raw.githubusercontent.com/ryanshoover/orb-wpengine-deploy/master/lib/codeception.dist.yml
 
+    - run:
+          name: Maybe move dxt-tester files
+          command: |
+              if [ -d "$CODECEPT_DIRECTORY/vendor/wpengine/dxt-tester/lib/codecept" ]; then
+                  mv "$CODECEPT_DIRECTORY/vendor/wpengine/dxt-tester/lib/codecept" $CODECEPT_DIRECTORY
+              fi
+
     # Run all our tests, one suite at a time
     - run:
           name: Run Codeception acceptance tests
