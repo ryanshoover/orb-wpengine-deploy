@@ -173,9 +173,9 @@ steps:
     - run:
           name: Export a database dump
           command: |
-              mkdir -p wp-content/mu-plugins
-              mkdir -p wp-content/plugins
-              mkdir -p wp-content/themes
+              mkdir -p -m 0755 wp-content/mu-plugins
+              mkdir -p -m 0755 wp-content/plugins
+              mkdir -p -m 0755 wp-content/themes
               wp db export wp-content/mysql.sql \
                   --skip-plugins \
                   --skip-themes \
