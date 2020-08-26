@@ -6,15 +6,15 @@ This is an orb that can be used in your CircleCI workflows. With it you can test
 
 ### Jobs
 
-#### `build`
+#### `wpengine/build`
 
 Build the files. Runs `composer install`, `yarn install`, and `yarn build` if a build job is defined. This is the base job that creates the core files used by all other jobs. It's a required step 1.
 
-#### `lint`
+#### `wpengine/lint`
 
 Lint the files to make sure everything follows best practices. Runs both `composer lint` and `yarn lint` if they're defined.
 
-#### `codeception`
+#### `wpengine/codeception`
 
 Run codeception tests for end-to-end testing. Codeception supports unit, wpunit functional, and acceptance testing. Please note that the job needs two parameters defined for plugins and themes
 
@@ -23,7 +23,7 @@ Run codeception tests for end-to-end testing. Codeception supports unit, wpunit 
 | `package_type` | One of `plugin`, `theme`, or `project` |
 | `package_name` | The directory name of the plugin or theme. Where should it be installed.  |
 
-#### `backstop`
+#### `wpengine/backstop`
 
 Run visual regression tests using backstopjs. Takes a single required parameter
 
@@ -31,7 +31,7 @@ Run visual regression tests using backstopjs. Takes a single required parameter
 |-----------|-------------|
 | `config` | Path to the backstopjs config file |
 
-#### `deploy_site`
+#### `wpengine/deploy_site`
 
 Deploys a site to a WP Engine install. The deploy process removes dev dependencies and any internal git settings.
 
@@ -39,7 +39,7 @@ Deploys a site to a WP Engine install. The deploy process removes dev dependenci
 |-----------|-------------|
 | `environment` | One of `production`, `staging`, `development`, or `SpecificInstallName` |
 
-#### `deploy_fury`
+#### `wpengine/deploy_fury`
 
 Deploys a plugin or theme to Gemfury. The deploy process compiles static files, removes dev dependencies and recreates the tag.
 
@@ -49,7 +49,7 @@ Deploys a plugin or theme to Gemfury. The deploy process compiles static files, 
 | `token` | Environment variable that defines the Gemfury push token. Defaults to `GEMFURY_TOKEN_PUSH`. |
 | `project` | Project name that Gemfury should deploy to. Defaults to the repository name. |
 
-#### `deploy_pr`
+#### `wpengine/deploy_pr`
 
 **IN PROGRESS** Draft job that creates a new pull request for the next step of the deploy process when a branch is merged into development or staging.
 
@@ -59,13 +59,13 @@ Deploys a plugin or theme to Gemfury. The deploy process compiles static files, 
 
 ### Executors
 
-`php`
+#### `wpengine/php`
 
 A basic PHP 7.4 container with node included.
 
 ### Commands
 
-#### `gitignoreswap`
+#### `wpengine/gitignoreswap`
 
 Swaps the `.gitignore` file for a plugin, theme, or project to a production-friendly gitignore that excludes source and test files.
 
