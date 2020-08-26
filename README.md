@@ -4,47 +4,74 @@ This is an orb that can be used in your CircleCI workflows. With it you can test
 
 ## Available Options
 
+### Jobs
+
+#### `build`
+
+Build the files. Runs `composer install`, `yarn install`, and `yarn build` if a build job is defined. This is the base job that creates the core files used by all other jobs. It's a required step 1.
+
+#### `lint`
+
+Lint the files to make sure everything follows best practices. Runs both `composer lint` and `yarn lint` if they're defined.
+
+#### `codeception`
+
+Run codeception tests for end-to-end testing. Codeception supports unit, wpunit functional, and acceptance testing. Please note that the job needs two parameters defined for plugins and themes
+
+| Parameter | Description |
+|-----------|-------------|
+| `package_type` | One of `plugin`, `theme`, or `project` |
+| `package_name` | The directory name of the plugin or theme. Where should it be installed.  |
+
+#### `backstop`
+
+Run visual regression tests using backstopjs. Takes a single required parameter
+
+| Parameter | Description |
+|-----------|-------------|
+| `config` | Path to the backstopjs config file |
+
+#### `deploy_site`
+
+Deploys a site to a WP Engine install. The deploy process removes dev dependencies and any internal git settings.
+
+| Parameter | Description |
+|-----------|-------------|
+| `environment` | One of `production`, `staging`, `development`, or `SpecificInstallName` |
+
+#### `deploy_fury`
+
+Deploys a plugin or theme to Gemfury. The deploy process compiles static files, removes dev dependencies and recreates the tag.
+
+| Parameter | Description |
+|-----------|-------------|
+| `user` | Environment variable that defines the Gemfury user. Defaults to `GEMFURY_USER`. |
+| `token` | Environment variable that defines the Gemfury push token. Defaults to `GEMFURY_TOKEN_PUSH`. |
+| `project` | Project name that Gemfury should deploy to. Defaults to the repository name. |
+
+#### `deploy_pr`
+
+**IN PROGRESS** Draft job that creates a new pull request for the next step of the deploy process when a branch is merged into development or staging.
+
+| Parameter | Description |
+|-----------|-------------|
+| `target` | Branch for the PR to target. |
+
 ### Executors
 
-`base`
+`php`
 
-A basic PHP 7.2 container with node and browsers included.
-
-`wp-browser`
-
-A custom container that supports codeception testing. The container is based on the [ryanshoover/wp-browser](https://github.com/ryanshoover/docker-wp-browser) image.
-
-`backstop`
-
-A container based on the backstop Docker image.
+A basic PHP 7.4 container with node included.
 
 ### Commands
 
-`install`
+#### `gitignoreswap`
 
-General setup command. Handles cache, git checkout, composer install, and yarn install.
+Swaps the `.gitignore` file for a plugin, theme, or project to a production-friendly gitignore that excludes source and test files.
 
-### Jobs
-
-`lint`
-
-Lint the files to make sure everything follows best practices. `yarn run lint` can be a combination of phpcs, jslint, sass-lint, and more
-
-`codeception`
-
-Run codeception tests for end-to-end testing. Codeception supports unit, wpunit functional, and acceptance testing.
-
-`packageCodeception`
-
-Run codeception tests on plugins and themes. Codeception supports unit, wpunit functional, and acceptance testing.
-
-`backstop`
-
-Run visual regression tests using backstopjs
-
-`build_deploy`
-
-Build and deploy the codebase to a WP Engine environment
+| Parameter | Description |
+|-----------|-------------|
+| `gitignore_type` | One of `site` or `package`. |
 
 ## Sample CircleCI Config
 
