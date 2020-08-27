@@ -193,7 +193,7 @@ steps:
           name: Maybe move dxt-tester files
           command: |
               if [ -d "$CODECEPT_DIRECTORY/vendor/wpengine/dxt-tester/lib/codecept" ]; then
-                  mv "$CODECEPT_DIRECTORY/vendor/wpengine/dxt-tester/lib/codecept" $CODECEPT_DIRECTORY
+                  mv "$CODECEPT_DIRECTORY/vendor/wpengine/dxt-tester/lib/codecept" "$CODECEPT_DIRECTORY"
               fi
 
     # Run all our tests, one suite at a time
