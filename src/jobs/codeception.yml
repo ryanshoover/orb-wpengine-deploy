@@ -28,7 +28,7 @@ steps:
 
     - restore_cache:
           keys:
-              - installwpbrowser
+              - installwpbrowser-{{ .Environment.CACHE_VERSION }}
 
     - run:
           name: Install wp-browser globally
@@ -48,7 +48,7 @@ steps:
                 wp-cli/wp-cli
 
     - save_cache:
-          key: installwpbrowser
+          key: installwpbrowser-{{ .Environment.CACHE_VERSION }}
           paths:
               - ~/.composer/vendor/
 
