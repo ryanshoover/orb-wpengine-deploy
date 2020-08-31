@@ -44,7 +44,7 @@ steps:
     - run:
           name: Build compiled files
           command: |
-              if jq '.scripts.build' package.json; then
+              if jq -e '.scripts.build' package.json; then
                   yarn run build
               fi
 

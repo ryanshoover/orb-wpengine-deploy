@@ -11,13 +11,13 @@ steps:
     - run:
           name: Run composer lint
           command: |
-              if jq '.scripts.lint' composer.json; then
+              if jq -e '.scripts.lint' composer.json; then
                   composer run lint
               fi
 
     - run:
           name: Run yarn lint
           command: |
-              if jq '.scripts.lint' package.json; then
+              if jq -e '.scripts.lint' package.json; then
                   yarn run lint
               fi
