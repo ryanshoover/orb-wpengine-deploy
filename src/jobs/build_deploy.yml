@@ -35,7 +35,7 @@ steps:
           command: |
               for PACKAGE_DIR in $(find . -regextype awk -regex "\./wp-content/(mu-plugins|plugins|themes)/(studiopress|wpengine)-[^/]*/package.json" | sed "s|/[^/]*$||")
               do
-                  if yarn --cwd "$PACKAGE_DIR" run --non-interactive | grep -qe "- build"
+                  if [ -d $PACKAGE_DIR/src && yarn --cwd "$PACKAGE_DIR" run --non-interactive | grep -qe "- build" ]
                   then
                       echo Building in "$PACKAGE_DIR"
                       yarn --cwd "$PACKAGE_DIR" run build
