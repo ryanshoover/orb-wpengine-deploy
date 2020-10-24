@@ -1,0 +1,29 @@
+description: Run visual regression tests using backstopjs
+
+parameters:
+    config:
+        description: Path to the backstop config file
+        type: string
+
+docker:
+    - image: backstopjs/backstopjs
+
+steps:
+    - checkout
+
+    - run: mkdir -p /tmp/backstop
+
+    - find-wpe-install
+
+    - run:
+          name: Build reference files pre-deploy
+          command: |
+              backstop reference \
+                  --config="<< parameters.config >>" \
+                  --reports_dir="/tmp/backstop" \
+                  --refurl="https://${ WPE_INSTALL }}.wpengine.com"
+
+    - persist_to_workspace:
+          root: /tmp/backstop
+          paths:
+              - .

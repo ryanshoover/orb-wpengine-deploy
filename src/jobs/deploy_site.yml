@@ -44,26 +44,7 @@ steps:
           command: mkdir -p ~/.ssh && ssh-keyscan -t rsa -H git.wpengine.com >> ~/.ssh/known_hosts
 
     # Set up our WPE_Install based on the environment
-    - run:
-          name: Set up the WPE install name
-          command: |
-              echo "export WPE_INSTALL=$(
-                  case "<< parameters.environment >>" in
-                      production)
-                          echo "$WPE_PRODUCTION_INSTALL"
-                          ;;
-                      staging)
-                          echo "$WPE_STAGING_INSTALL"
-                          ;;
-                      development)
-                          echo "$WPE_DEVELOPMENT_INSTALL"
-                          ;;
-                      *)
-                          echo "<< parameters.environment >>"
-                          ;;
-                  esac
-              )" >> "$BASH_ENV"
-              source "$BASH_ENV"
+    - find-wpe-install
 
     # Set up the git remotes for WP Engine
     - run:
@@ -100,3 +81,5 @@ steps:
               - rollbar/notify_deploy_finished:
                     status: succeeded
                     deploy_id: ${ROLLBAR_DEPLOY_ID}
+
+    - approve-hold-for-deploy

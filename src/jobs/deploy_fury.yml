@@ -64,3 +64,5 @@ steps:
     - deploy:
             name: Deploy to GemFury
             command: git push fury master --tags --force
+
+    - approve-hold-for-deploy

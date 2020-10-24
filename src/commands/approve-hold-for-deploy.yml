@@ -1,0 +1,29 @@
+description: |
+    Approves a Backstop workflow
+
+steps:
+
+    - run:
+          name: Get workflow
+          command: |
+              WORKFLOW=$( curl --location \
+                  --request GET "https://circleci.com/api/v2/pipeline/<< pipeline.id >>/workflow" \
+                  -u "${ CIRCLE_TOKEN }": \
+                  | jq '.items[].id' )
+              echo "export WORKFLOW" >> "$BASH_ENV"; source "$BASH_ENV"
+
+    - run:
+          name: Get job
+          command: |
+              JOB=$( curl --location \
+                  --request GET "https://circleci.com/api/v2/workflow/${ WORKFLOW }/job" \
+                  -u "${ CIRCLE_TOKEN }": \
+                  | jq '.items[].id' )
+              echo "export JOB" >> "$BASH_ENV"; source "$BASH_ENV"
+
+    - run:
+          name: Approve job
+          command: |
+              curl --request POST \
+                  --url "https://circleci.com/api/v2/workflow/${ WORKFLOW }/approve/${ JOB }" \
+                  -u "${ CIRCLE_TOKEN }":

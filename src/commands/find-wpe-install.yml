@@ -1,0 +1,23 @@
+description: Set up our WPE_Install based on the environment
+
+steps:
+    - run:
+          name: Set up the WPE install name
+          command: |
+              echo "export WPE_INSTALL=$(
+                  case "$CIRCLE_BRANCH" in
+                      master)
+                          echo "$WPE_PRODUCTION_INSTALL"
+                          ;;
+                      production)
+                          echo "$WPE_PRODUCTION_INSTALL"
+                          ;;
+                      staging)
+                          echo "$WPE_STAGING_INSTALL"
+                          ;;
+                      development)
+                          echo "$WPE_DEVELOPMENT_INSTALL"
+                          ;;
+                  esac
+              )" >> "$BASH_ENV"
+              source "$BASH_ENV"

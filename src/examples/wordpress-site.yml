@@ -69,9 +69,22 @@ usage:
 
         regression:
             jobs:
-                - wpengine/backstop:
-                      config: tests/_backstop/index.js
-                      filters:
-                          branches:
-                              only:
-                                  - staging
+                - wpengine/backstop-reference:
+                    config: tests/backstop/
+                    context: DXT
+                    filters:
+                        branches:
+                            only:
+                                - development
+                                - staging
+                                - master
+                                - production
+
+                - hold-for-deploy:
+                    type: approval
+                    requires: wpengine/backstop-reference
+
+                - wpengine/backstop-test:
+                    config: tests/backstop/
+                    context: DXT
+                    requires: hold-for-deploy
