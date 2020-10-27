@@ -82,9 +82,11 @@ usage:
 
                 - hold-for-deploy:
                     type: approval
-                    requires: wpengine/backstop-reference
+                    requires:
+                        - wpengine/backstop-reference
 
                 - wpengine/backstop_test:
                     config: tests/backstop/
                     context: DXT
-                    requires: hold-for-deploy
+                    requires:
+                        - hold-for-deploy
