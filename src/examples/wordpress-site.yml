@@ -72,21 +72,21 @@ usage:
         regression:
             jobs:
                 - wpengine/backstop_reference:
-                    config: tests/backstop/
-                    context: DXT
-                    filters:
-                        branches:
-                            only:
-                                - staging
-                                - master
+                      config: tests/backstop/
+                      context: DXT
+                      filters:
+                          branches:
+                              only:
+                                  - staging
+                                  - master
 
                 - hold-for-deploy:
-                    type: approval
-                    requires:
-                        - wpengine/backstop-reference
+                      type: approval
+                      requires:
+                          - wpengine/backstop-reference
 
                 - wpengine/backstop_test:
-                    config: tests/backstop/
-                    context: DXT
-                    requires:
-                        - hold-for-deploy
+                      config: tests/backstop/
+                      context: DXT
+                      requires:
+                          - hold-for-deploy
