@@ -9,21 +9,23 @@ docker:
     - image: backstopjs/backstopjs
 
 steps:
+    - attach_workspace:
+          at: /tmp/backstop
+
     - checkout
 
-    - run: mkdir -p /tmp/backstop
-
-    - find-wpe-install
+    - find_wpe_install
 
     - run:
-          name: Build reference files pre-deploy
+          name: Test against deployed site
           command: |
-              backstop reference \
+              backstop test \
                   --config="<< parameters.config >>" \
                   --reports_dir="/tmp/backstop" \
-                  --refurl="https://${ WPE_INSTALL }}.wpengine.com"
+                  --url="https://${ WPE_INSTALL }}.wpengine.com"
 
-    - persist_to_workspace:
-          root: /tmp/backstop
-          paths:
-              - .
+    - store_artifacts:
+          path: /tmp/backstop
+
+    - store_test_results:
+          path: /tmp/backstop

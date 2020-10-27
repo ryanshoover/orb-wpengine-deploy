@@ -1,15 +1,25 @@
 description: |
-    Approves a Backstop workflow
+    Approves the regression workflow that is waiting for the deploy to finish
+
+parameters:
+    regression_workflow:
+        description: Name of the regression workflow that needs approved
+        type: string
+        default: regression
+
+    regression_job:
+        description: Name of the job that needs approved
+        type: string
+        default: hold-for-deploy
 
 steps:
-
     - run:
           name: Get workflow
           command: |
               WORKFLOW=$( curl --location \
                   --request GET "https://circleci.com/api/v2/pipeline/<< pipeline.id >>/workflow" \
                   -u "${ CIRCLE_TOKEN }": \
-                  | jq '.items[].id' )
+                  | jq -r '.items[] | select( .name == "<< parameters.regression_workflow >>" ) | .id' )
               echo "export WORKFLOW" >> "$BASH_ENV"; source "$BASH_ENV"
 
     - run:
@@ -18,7 +28,7 @@ steps:
               JOB=$( curl --location \
                   --request GET "https://circleci.com/api/v2/workflow/${ WORKFLOW }/job" \
                   -u "${ CIRCLE_TOKEN }": \
-                  | jq '.items[].id' )
+                  | jq -r '.items[] | select( .name == "<< parameters.regression_job >>" ) | .id' )
               echo "export JOB" >> "$BASH_ENV"; source "$BASH_ENV"
 
     - run:
