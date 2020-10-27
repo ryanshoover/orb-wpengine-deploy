@@ -10,7 +10,7 @@ docker:
 
 steps:
     - attach_workspace:
-          at: /tmp/backstop
+          at: /tmp/tests
 
     - checkout
 
@@ -21,11 +21,11 @@ steps:
           command: |
               backstop test \
                   --config="<< parameters.config >>" \
-                  --reports_dir="/tmp/backstop" \
+                  --reports_dir="/tmp/tests/backstop" \
                   --url="https://${ WPE_INSTALL }}.wpengine.com"
 
     - store_artifacts:
-          path: /tmp/backstop
+          path: /tmp/tests/backstop
 
     - store_test_results:
-          path: /tmp/backstop
+          path: /tmp/tests/backstop

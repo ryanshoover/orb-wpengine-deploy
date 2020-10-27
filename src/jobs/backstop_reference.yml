@@ -11,7 +11,7 @@ docker:
 steps:
     - checkout
 
-    - run: mkdir -p /tmp/backstop
+    - run: mkdir -p /tmp/tests/backstop
 
     - find_wpe_install
 
@@ -20,10 +20,10 @@ steps:
           command: |
               backstop reference \
                   --config="<< parameters.config >>" \
-                  --reports_dir="/tmp/backstop" \
+                  --reports_dir="/tmp/tests/backstop" \
                   --refurl="https://${ WPE_INSTALL }}.wpengine.com"
 
     - persist_to_workspace:
-          root: /tmp/backstop
+          root: /tmp/tests
           paths:
               - .
