@@ -18,8 +18,8 @@ steps:
           command: |
               WORKFLOW=$( curl --location \
                   --request GET "https://circleci.com/api/v2/pipeline/<< pipeline.id >>/workflow" \
-                  -u "${ CIRCLE_TOKEN }": \
-                  | jq -r '.items[] | select( .name == "<< parameters.regression_workflow >>" ) | .id' )
+                  -u "$CIRCLE_TOKEN": \
+                  | jq -r ".items[] | select( .name == \"<< parameters.regression_workflow >>\" ) | .id" )
               echo "export WORKFLOW" >> "$BASH_ENV"; source "$BASH_ENV"
 
     - run:
@@ -27,8 +27,8 @@ steps:
           command: |
               JOB=$( curl --location \
                   --request GET "https://circleci.com/api/v2/workflow/${ WORKFLOW }/job" \
-                  -u "${ CIRCLE_TOKEN }": \
-                  | jq -r '.items[] | select( .name == "<< parameters.regression_job >>" ) | .id' )
+                  -u "$CIRCLE_TOKEN": \
+                  | jq -r ".items[] | select( .name == \"<< parameters.regression_job >>\" ) | .id" )
               echo "export JOB" >> "$BASH_ENV"; source "$BASH_ENV"
 
     - run:
@@ -36,4 +36,4 @@ steps:
           command: |
               curl --request POST \
                   --url "https://circleci.com/api/v2/workflow/${ WORKFLOW }/approve/${ JOB }" \
-                  -u "${ CIRCLE_TOKEN }":
+                  -u "$CIRCLE_TOKEN":

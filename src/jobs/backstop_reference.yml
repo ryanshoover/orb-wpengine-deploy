@@ -21,7 +21,7 @@ steps:
               backstop reference \
                   --config="<< parameters.config >>" \
                   --reports_dir="/tmp/tests/backstop" \
-                  --refurl="https://${ WPE_INSTALL }}.wpengine.com"
+                  --refurl="https://${ WPE_INSTALL }.wpengine.com"
 
     - persist_to_workspace:
           root: /tmp/tests
