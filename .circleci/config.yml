@@ -27,7 +27,15 @@ jobs:
             - image: cimg/php:7.4-node
         steps:
             - checkout
-            - run: composer global exec codecept --version
+            - run:
+                  name: Add global composer bin-dir to PATH
+                  command: |
+                      COMPOSER_GLOBAL_BIN=$(composer global config bin-dir --absolute --quiet)
+                      if ! echo "$PATH" | grep "$COMPOSER_GLOBAL_BIN"; then
+                          echo "export PATH=$COMPOSER_GLOBAL_BIN:$PATH" >> "$BASH_ENV"
+                          source "$BASH_ENV"
+                      fi
+            - run: codecept --version
             - run: wp --info
 
 workflows:
