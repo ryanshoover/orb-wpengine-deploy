@@ -28,6 +28,7 @@ jobs:
         steps:
             - checkout
             - run: composer global exec codecept --version
+            - run: wp --info
 
 workflows:
     integration-tests:
