@@ -84,7 +84,7 @@ usage:
                 - hold-for-deploy:
                       type: approval
                       requires:
-                          - wpengine/backstop-reference
+                          - wpengine/backstop_reference
 
                 - wpengine/backstop_test:
                       config: tests/backstop/
