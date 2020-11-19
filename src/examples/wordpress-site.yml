@@ -38,6 +38,7 @@ usage:
                       name: deploy-staging
                       environment: staging
                       regression_enabled: true
+                      pipeline_id: << pipeline.id >>
                       requires:
                           - wpengine/lint
                           - wpengine/codeception

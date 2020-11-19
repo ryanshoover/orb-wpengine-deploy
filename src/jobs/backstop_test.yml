@@ -22,7 +22,7 @@ steps:
               backstop test \
                   --config="<< parameters.config >>" \
                   --reports_dir="/tmp/tests/backstop" \
-                  --url="https://${ WPE_INSTALL }.wpengine.com"
+                  --url="https://$WPE_INSTALL.wpengine.com"
 
     - store_artifacts:
           path: /tmp/tests/backstop

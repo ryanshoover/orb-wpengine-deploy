@@ -33,6 +33,12 @@ parameters:
         type: string
         default: hold-for-deploy
 
+    pipeline_id:
+        description: Pipeline ID from the job. The orb can't access the ID directly for security reasons
+        type: string
+        default: "00000000-0000-0000-0000-000000000001"
+
+
 executor: php
 
 steps:
@@ -108,3 +114,4 @@ steps:
               - approve_hold_for_deploy:
                     regression_workflow: << parameters.regression_workflow >>
                     regression_job: << parameters.regression_job >>
+                    pipeline_id: << parameters.pipeline_id >>
