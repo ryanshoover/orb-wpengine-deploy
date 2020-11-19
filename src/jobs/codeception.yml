@@ -79,6 +79,15 @@ steps:
           key: installwpbrowser-{{ .Environment.CACHE_VERSION }}
           paths:
               - ~/.composer
+              - ~/.config/composer
+
+    - run:
+          name: Add global composer bin-dir to PATH
+          command: |
+              COMPOSER_GLOBAL_BIN=$(composer global config bin-dir --absolute --quiet)
+              if ! echo "$PATH" | grep "$COMPOSER_GLOBAL_BIN"; then
+                  echo "export PATH=$COMPOSER_GLOBAL_BIN:$PATH" >> "$BASH_ENV"
+              fi
 
     - run:
           name: Set up Apache

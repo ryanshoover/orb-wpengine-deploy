@@ -27,7 +27,6 @@ jobs:
             - image: cimg/php:7.4-node
         steps:
             - checkout
-            - run: composer global exec codecept --version
 
 workflows:
     integration-tests:
