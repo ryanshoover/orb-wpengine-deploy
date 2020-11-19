@@ -18,6 +18,9 @@ steps:
                       development)
                           echo "$WPE_DEVELOPMENT_INSTALL"
                           ;;
+                      nojira-circleci)
+                          echo "$WPE_PRODUCTION_INSTALL"
+                          ;;
                   esac
               )" >> "$BASH_ENV"
               source "$BASH_ENV"
