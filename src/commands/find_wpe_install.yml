@@ -1,26 +1,34 @@
 description: Set up our WPE_Install based on the environment
 
+parameters:
+    environment:
+        description: |
+            Are we deploying to the production, staging, development, or custom environment?
+            Production, staging, and development need a corresponding environment variable defined
+            in CircleCI's project configuration. An optional `./.gitignores/__deployment`
+            file can be used to deploy build files rather than source files.
+        type: string
+        default: undefined
+
 steps:
     - run:
           name: Set up the WPE install name
           command: |
-              echo "export WPE_INSTALL=$(
-                  case "$CIRCLE_BRANCH" in
-                      master)
-                          echo "$WPE_PRODUCTION_INSTALL"
-                          ;;
-                      production)
-                          echo "$WPE_PRODUCTION_INSTALL"
-                          ;;
-                      staging)
-                          echo "$WPE_STAGING_INSTALL"
-                          ;;
-                      development)
-                          echo "$WPE_DEVELOPMENT_INSTALL"
-                          ;;
-                      nojira-circleci)
-                          echo "$WPE_DEVELOPMENT_INSTALL"
-                          ;;
-                  esac
-              )" >> "$BASH_ENV"
+              if [[ "undefined" == "<< parameters.environment >>" ]]; then
+                  WPE_ENV="$CIRCLE_BRANCH"
+              else
+                  WPE_ENV="<< parameters.environment >>""
+              fi
+
+              case "$WPE_ENV" in
+                  master)
+                  production)
+                      WPE_INSTALL="$WPE_PRODUCTION_INSTALL";;
+                  staging)
+                      WPE_INSTALL="$WPE_STAGING_INSTALL";;
+                  *)
+                      WPE_INSTALL="$WPE_DEVELOPMENT_INSTALL";;
+              esac
+
+              echo "export WPE_INSTALL=$WPE_INSTALL" >> "$BASH_ENV"
               source "$BASH_ENV"

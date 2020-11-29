@@ -70,7 +70,8 @@ steps:
           command: mkdir -p ~/.ssh && ssh-keyscan -t rsa -H git.wpengine.com >> ~/.ssh/known_hosts
 
     # Set up our WPE_Install based on the environment
-    - find_wpe_install
+    - find_wpe_install:
+          environment: << parameters.environment >>
 
     # Set up the git remotes for WP Engine
     - run:
