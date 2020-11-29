@@ -22,6 +22,7 @@ steps:
 
               case "$WPE_ENV" in
                   master)
+                      WPE_INSTALL="$WPE_PRODUCTION_INSTALL";;
                   production)
                       WPE_INSTALL="$WPE_PRODUCTION_INSTALL";;
                   staging)
