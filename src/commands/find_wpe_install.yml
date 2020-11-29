@@ -17,7 +17,7 @@ steps:
               if [[ "undefined" == "<< parameters.environment >>" ]]; then
                   WPE_ENV="$CIRCLE_BRANCH"
               else
-                  WPE_ENV="<< parameters.environment >>""
+                  WPE_ENV="<< parameters.environment >>"
               fi
 
               case "$WPE_ENV" in
