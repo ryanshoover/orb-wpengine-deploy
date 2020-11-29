@@ -14,6 +14,7 @@ steps:
     - run:
           name: Set up the WPE install name
           command: |
+              # shellcheck disable=SC2050
               if [[ "undefined" == "<< parameters.environment >>" ]]; then
                   WPE_ENV="$CIRCLE_BRANCH"
               else
