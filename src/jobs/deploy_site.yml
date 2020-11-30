@@ -8,10 +8,36 @@ parameters:
             in CircleCI's project configuration. An optional `./.gitignores/__deployment`
             file can be used to deploy build files rather than source files.
         type: string
+
     rollbar_token:
         description: API token for accessing Rollbar
         type: env_var_name
         default: ROLLBAR_ACCESS_TOKEN
+
+    regression_enabled:
+        description: |
+            Should we try to approve a regression workflow?
+            If you have a regression workflow that runs in parallel to your deploy workflows,
+            set this to be true. The regression workflow's "hold for approval" job will be approved
+            once the deploy finishes.
+        type: boolean
+        default: false
+
+    regression_workflow:
+        description: Name of the regression workflow that needs approved
+        type: string
+        default: regression
+
+    regression_job:
+        description: Name of the job that needs approved
+        type: string
+        default: hold-for-deploy
+
+    pipeline_id:
+        description: Pipeline ID from the job. The orb can't access the ID directly for security reasons
+        type: string
+        default: "00000000-0000-0000-0000-000000000001"
+
 
 executor: php
 
@@ -44,26 +70,8 @@ steps:
           command: mkdir -p ~/.ssh && ssh-keyscan -t rsa -H git.wpengine.com >> ~/.ssh/known_hosts
 
     # Set up our WPE_Install based on the environment
-    - run:
-          name: Set up the WPE install name
-          command: |
-              echo "export WPE_INSTALL=$(
-                  case "<< parameters.environment >>" in
-                      production)
-                          echo "$WPE_PRODUCTION_INSTALL"
-                          ;;
-                      staging)
-                          echo "$WPE_STAGING_INSTALL"
-                          ;;
-                      development)
-                          echo "$WPE_DEVELOPMENT_INSTALL"
-                          ;;
-                      *)
-                          echo "<< parameters.environment >>"
-                          ;;
-                  esac
-              )" >> "$BASH_ENV"
-              source "$BASH_ENV"
+    - find_wpe_install:
+          environment: << parameters.environment >>
 
     # Set up the git remotes for WP Engine
     - run:
@@ -100,3 +108,11 @@ steps:
               - rollbar/notify_deploy_finished:
                     status: succeeded
                     deploy_id: ${ROLLBAR_DEPLOY_ID}
+
+    - when:
+          condition: << parameters.regression_enabled >>
+          steps:
+              - approve_hold_for_deploy:
+                    regression_workflow: << parameters.regression_workflow >>
+                    regression_job: << parameters.regression_job >>
+                    pipeline_id: << parameters.pipeline_id >>

@@ -1,0 +1,49 @@
+description: |
+    Approves the regression workflow that is waiting for the deploy to finish
+
+parameters:
+    circle_token:
+        description: Environment variable that contains a CircleCI API token
+        type: env_var_name
+        default: CIRCLE_TOKEN
+    regression_workflow:
+        description: Name of the regression workflow that needs approved
+        type: string
+        default: regression
+
+    regression_job:
+        description: Name of the job that needs approved
+        type: string
+        default: hold-for-deploy
+
+    pipeline_id:
+        description: Pipeline ID from the job. The orb can't access the ID directly for security reasons
+        type: string
+
+steps:
+    - run:
+          name: Get workflow
+          command: |
+              # shellcheck disable=SC1073
+              WORKFLOW=$( curl --location \
+                  --request GET "https://circleci.com/api/v2/pipeline/<< parameters.pipeline_id >>/workflow" \
+                  -u "$<< parameters.circle_token >>:" \
+                  | jq -r ".items[] | select( .name == \"<< parameters.regression_workflow >>\" ) | .id" )
+              echo "export WORKFLOW=$WORKFLOW" >> "$BASH_ENV"; source "$BASH_ENV"
+
+    - run:
+          name: Get job
+          command: |
+              # shellcheck disable=SC1073
+              JOB=$( curl --location \
+                  --request GET "https://circleci.com/api/v2/workflow/$WORKFLOW/job" \
+                  -u "$<< parameters.circle_token >>:" \
+                  | jq -r ".items[] | select( .name == \"<< parameters.regression_job >>\" ) | .id" )
+              echo "export JOB=$JOB" >> "$BASH_ENV"; source "$BASH_ENV"
+
+    - run:
+          name: Approve job
+          command: |
+              curl --request POST \
+                  --url "https://circleci.com/api/v2/workflow/$WORKFLOW/approve/$JOB" \
+                  -u "$<< parameters.circle_token >>:"

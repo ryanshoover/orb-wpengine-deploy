@@ -37,6 +37,8 @@ usage:
                 - wpengine/deploy_site:
                       name: deploy-staging
                       environment: staging
+                      regression_enabled: true
+                      pipeline_id: << pipeline.id >>
                       requires:
                           - wpengine/lint
                           - wpengine/codeception
@@ -47,6 +49,7 @@ usage:
                 - wpengine/deploy_site:
                       name: deploy-production
                       environment: production
+                      regression_enabled: true
                       requires:
                           - wpengine/lint
                           - wpengine/codeception
@@ -69,9 +72,22 @@ usage:
 
         regression:
             jobs:
-                - wpengine/backstop:
-                      config: tests/_backstop/index.js
+                - wpengine/backstop_reference:
+                      config: tests/backstop/
+                      context: DXT
                       filters:
                           branches:
                               only:
                                   - staging
+                                  - master
+
+                - hold-for-deploy:
+                      type: approval
+                      requires:
+                          - wpengine/backstop_reference
+
+                - wpengine/backstop_test:
+                      config: tests/backstop/
+                      context: DXT
+                      requires:
+                          - hold-for-deploy
