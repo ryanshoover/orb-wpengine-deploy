@@ -45,7 +45,7 @@ steps:
                 codeception/util-universalframework \
                 league/factory-muffin \
                 league/factory-muffin-faker \
-                wp-cli/wp-cli
+                wp-cli/wp-cli-bundle
 
     - save_cache:
           key: installwpbrowser-{{ .Environment.CACHE_VERSION }}
