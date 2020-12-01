@@ -65,6 +65,7 @@ workflows:
                   add-pr-comment: true
                   bot-token-variable: GITHUB_TOKEN
                   bot-user: ryanshoover
+                  perform-branch-check: false
                   filters:
                       branches:
                           ignore: /.*/
