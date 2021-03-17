@@ -53,6 +53,7 @@ usage:
                       requires:
                           - wpengine/lint
                           - wpengine/codeception
+                          - wpengine/backup_prod
                       filters:
                           branches:
                               only:
