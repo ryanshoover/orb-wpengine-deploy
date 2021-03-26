@@ -1,6 +1,6 @@
 description: |
     Generate a backup of production prior to deployment.
-    `yarn run dxt-backup` 
+    `yarn run dxt-backup`
 
 executor: php
 
