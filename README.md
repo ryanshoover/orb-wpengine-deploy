@@ -57,6 +57,11 @@ Deploys a plugin or theme to Gemfury. The deploy process compiles static files, 
 |-----------|-------------|
 | `target` | Branch for the PR to target. |
 
+#### `wpengine/backup`
+
+Custom backup job for our sites that have the @dxt/backup package installed.
+
+
 ### Executors
 
 #### `wpengine/php`
