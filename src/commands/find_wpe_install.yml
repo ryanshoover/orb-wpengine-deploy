@@ -21,6 +21,7 @@ steps:
                   WPE_ENV="<< parameters.environment >>"
               fi
 
+              # Set the destination according to the environment.
               case "$WPE_ENV" in
                   master)
                       WPE_INSTALL="$WPE_PRODUCTION_INSTALL";;
@@ -31,6 +32,11 @@ steps:
                   *)
                       WPE_INSTALL="$WPE_DEVELOPMENT_INSTALL";;
               esac
+
+              # Match any deploy-install pattern and set the install as the destination.
+              if [[ "$CIRCLE_BRANCH" =~ deploy-[a-z][a-z0-9]{2,13} ]]; then
+                  WPE_INSTALL="${CIRCLE_BRANCH/deploy-/}"
+              fi
 
               echo "export WPE_INSTALL=$WPE_INSTALL" >> "$BASH_ENV"
               source "$BASH_ENV"
