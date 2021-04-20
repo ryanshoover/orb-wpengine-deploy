@@ -50,6 +50,7 @@ usage:
                       name: deploy-production
                       environment: production
                       regression_enabled: true
+                      pipeline_id: << pipeline.id >>
                       requires:
                           - wpengine/lint
                           - wpengine/codeception
