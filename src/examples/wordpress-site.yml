@@ -72,6 +72,16 @@ usage:
                               only:
                                   - /feat-.*/
 
+                - wpengine/deploy_site:
+                      name: deploy-site
+                      requires:
+                          - wpengine/lint
+                          - wpengine/codeception
+                      filters:
+                          branches:
+                              only:
+                                  - /deploy-.*/
+
         regression:
             jobs:
                 - wpengine/backstop_reference:
