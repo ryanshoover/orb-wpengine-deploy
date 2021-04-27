@@ -24,6 +24,7 @@ usage:
                       requires:
                           - wpengine/build
 
+                # Deploy to development
                 - wpengine/deploy_site:
                       name: deploy-development
                       environment: development
@@ -34,6 +35,8 @@ usage:
                           branches:
                               only: development
 
+                # Deploy to staging
+                # If regression is enabled, you must also pass the pipeline ID
                 - wpengine/deploy_site:
                       name: deploy-staging
                       environment: staging
@@ -46,6 +49,8 @@ usage:
                           branches:
                               only: staging
 
+                # Deploy to production
+                # If regression is enabled, you must also pass the pipeline ID
                 - wpengine/deploy_site:
                       name: deploy-production
                       environment: production
@@ -61,6 +66,7 @@ usage:
                                   - master
                                   - production
 
+                # Deploy any branch starting with `feat-` to a feature install
                 - wpengine/deploy_site:
                       name: deploy-feature
                       environment: thenameofmyfeatureinstall
@@ -72,8 +78,10 @@ usage:
                               only:
                                   - /feat-.*/
 
+                # Deploy to any install. Specify the install by the branch name. `deploy-INSTALLNAME`
                 - wpengine/deploy_site:
                       name: deploy-site
+                      environment: qa
                       requires:
                           - wpengine/lint
                           - wpengine/codeception
