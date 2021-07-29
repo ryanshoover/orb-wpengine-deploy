@@ -1,6 +1,6 @@
 # CircleCI Orb for WP Engine Deploys
 
-This is an orb that can be used in your CircleCI workflows. With it you can test WordPress site repos and deploy to WP Engine environments.
+This is an orb that can be used in your CircleCI workflows. You can use it to test WordPress site repos and deploy to WP Engine environments.
 
 ## Available Options
 
