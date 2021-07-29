@@ -27,7 +27,7 @@ steps:
           command: git add .
     - run:
           name: After adding all files, remove files that should be ignored
-          command: git ls-files -z --ignored --exclude-standard | xargs -0 git rm -r --force --ignore-unmatch --cached
+          command: git ls-files -c -z --ignored --exclude-standard | xargs -0 git rm -r --force --ignore-unmatch --cached
     - run:
           name: Commit build files
           command: git commit -m "Deployment commit"
