@@ -49,6 +49,7 @@ steps:
           command: |
             sudo apt-get update && \
             sudo apt-get -y install \
+                apache2 \
                 default-mysql-client \
                 libjpeg-dev \
                 libpng-dev \
