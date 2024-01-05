@@ -1,50 +1,30 @@
+version: 2.1
 description: |
-    A sample CircleCI config file that uses the ryanshoover/wpengine orb
-    to test a site repo at every stage, deploy the site to WP Engine
-    environments, and run regressions on the staging site.
-
-usage:
-    version: 2.1
-
-    orbs:
-        wpengine: ryanshoover/wpengine@x.y.z
-
-    workflows:
-        version: 2
-
-        build_test_deploy:
+   A sample CircleCI config to deploy to WP Engine.
+orbs:
+    wpengine: jayhill90/wpe-deploy@0.8.0
+    
+workflows:
+    build_test_deploy:
             jobs:
                 - wpengine/build
-
-                - wpengine/lint:
-                      requires:
-                          - wpengine/build
-
-                - wpengine/codeception:
-                      requires:
-                          - wpengine/build
-
                 # Deploy to development
                 - wpengine/deploy_site:
                       name: deploy-development
                       environment: development
                       requires:
-                          - wpengine/lint
-                          - wpengine/codeception
+                          - wpengine/build
                       filters:
                           branches:
                               only: development
-
                 # Deploy to staging
                 # If regression is enabled, you must also pass the pipeline ID
                 - wpengine/deploy_site:
                       name: deploy-staging
                       environment: staging
-                      regression_enabled: true
                       pipeline_id: << pipeline.id >>
                       requires:
-                          - wpengine/lint
-                          - wpengine/codeception
+                          - wpengine/build
                       filters:
                           branches:
                               only: staging
@@ -54,12 +34,9 @@ usage:
                 - wpengine/deploy_site:
                       name: deploy-production
                       environment: production
-                      regression_enabled: true
                       pipeline_id: << pipeline.id >>
                       requires:
-                          - wpengine/lint
-                          - wpengine/codeception
-                          - wpengine/backup
+                          - wpengine/build
                       filters:
                           branches:
                               only:
@@ -71,8 +48,7 @@ usage:
                       name: deploy-feature
                       environment: thenameofmyfeatureinstall
                       requires:
-                          - wpengine/lint
-                          - wpengine/codeception
+                          - wpengine/build
                       filters:
                           branches:
                               only:
@@ -83,31 +59,8 @@ usage:
                       name: deploy-site
                       environment: qa
                       requires:
-                          - wpengine/lint
-                          - wpengine/codeception
+                          - wpengine/build
                       filters:
                           branches:
                               only:
                                   - /deploy-.*/
-
-        regression:
-            jobs:
-                - wpengine/backstop_reference:
-                      config: tests/backstop/
-                      context: DXT
-                      filters:
-                          branches:
-                              only:
-                                  - staging
-                                  - master
-
-                - hold-for-deploy:
-                      type: approval
-                      requires:
-                          - wpengine/backstop_reference
-
-                - wpengine/backstop_test:
-                      config: tests/backstop/
-                      context: DXT
-                      requires:
-                          - hold-for-deploy

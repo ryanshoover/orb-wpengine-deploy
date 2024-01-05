@@ -23,7 +23,7 @@ steps:
 
     - restore_cache:
           keys:
-              - yarn-{{ .Environment.CACHE_VERSION }}-{{ checksum "yarn.lock" }}
+              - npm-{{ .Environment.CACHE_VERSION }}-{{ checksum "package-lock.json" }}
 
     - run:
           name: Add Gemfury registry
@@ -34,18 +34,18 @@ steps:
     - run:
           name: Install node dependencies
           command: |
-              if [ -f yarn.lock ]; then
-                  yarn install --emoji false --non-interactive
+              if [ -f package-lock.json ]; then
+                  npm install 
               fi
     - save_cache:
           paths:
               - ./node_modules
-          key: yarn-{{ .Environment.CACHE_VERSION }}-{{ checksum "yarn.lock" }}
+          key: npm-{{ .Environment.CACHE_VERSION }}-{{ checksum "package-lock.json" }}
     - run:
           name: Build compiled files
           command: |
               if jq -e '.scripts.build' package.json; then
-                  yarn run build
+                  npm run build
               fi
 
     - persist_to_workspace:
