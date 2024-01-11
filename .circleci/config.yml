@@ -3,7 +3,7 @@ version: 2.1
 # Orbs
 orbs:
     orb-tools: circleci/orb-tools@9
-    wpe-deploy: jayhill90/wpe-deploy@<< pipeline.parameters.dev-orb-version >>
+    wpengine: ryanshoover/wpengine@<< pipeline.parameters.dev-orb-version >>
 
 orb_prep_jobs: &orb_prep_jobs
     [
@@ -41,7 +41,7 @@ workflows:
             - orb-tools/shellcheck
             - orb-tools/pack
             - orb-tools/publish-dev:
-                  orb-name: jayhill90/wpe-deploy
+                  orb-name: ryanshoover/wpengine
                   requires:
                       - orb-tools/lint
                       - orb-tools/shellcheck
@@ -64,13 +64,13 @@ workflows:
             - orb-tools/dev-promote-prod-from-git-tag:
                   add-pr-comment: true
                   bot-token-variable: GITHUB_TOKEN
-                  bot-user: jayhill90
+                  bot-user: ryanshoover
                   perform-branch-check: false
                   filters:
                       branches:
                           ignore: /.*/
                       tags:
                           only: /^(major|minor|patch)-release-v\d+\.\d+\.\d+$/
-                  orb-name: jayhill90/wpe-deploy
+                  orb-name: ryanshoover/wpengine
                   requires:
                       - hold-for-approval
