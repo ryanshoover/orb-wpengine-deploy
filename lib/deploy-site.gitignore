@@ -41,11 +41,6 @@
 .svn
 gulpfile*
 
-# Node Dependency Files
-/node_modules/
-auth.json
-yarn-error.log
-
 # Known large file types
 *.sql
 *.hqx
