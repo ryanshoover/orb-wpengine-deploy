@@ -39,29 +39,6 @@ Deploys a site to a WP Engine install. The deploy process removes dev dependenci
 |-----------|-------------|
 | `environment` | One of `production`, `staging`, `development`, or `SpecificInstallName` |
 
-#### `wpengine/deploy_fury`
-
-Deploys a plugin or theme to Gemfury. The deploy process compiles static files, removes dev dependencies and recreates the tag.
-
-| Parameter | Description |
-|-----------|-------------|
-| `user` | Environment variable that defines the Gemfury user. Defaults to `GEMFURY_USER`. |
-| `token` | Environment variable that defines the Gemfury push token. Defaults to `GEMFURY_TOKEN_PUSH`. |
-| `project` | Project name that Gemfury should deploy to. Defaults to the repository name. |
-
-#### `wpengine/deploy_pr`
-
-**IN PROGRESS** Draft job that creates a new pull request for the next step of the deploy process when a branch is merged into development or staging.
-
-| Parameter | Description |
-|-----------|-------------|
-| `target` | Branch for the PR to target. |
-
-#### `wpengine/backup`
-
-Custom backup job for our sites that have the @dxt/backup package installed.
-
-
 ### Executors
 
 #### `wpengine/php`
