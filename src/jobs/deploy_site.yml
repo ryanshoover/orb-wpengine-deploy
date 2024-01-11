@@ -55,9 +55,9 @@ steps:
     # npm prune --production to clean out devDependencies
     # See https://github.com/yarnpkg/yarn/issues/696
     - run:
-          name: Install production yarn dependencies
+          name: Install production npm dependencies
           command: |
-              if [ -f yarn.lock ]; then
+              if [ -f package-lock.json ]; then
                   npm prune --production
               fi
 
@@ -78,7 +78,7 @@ steps:
           name: Set up the WP Engine install git remotes
           command: |
               git config --global user.email "deploy@circleci.local"
-              git config --global user.name "$CIRCLE_PROJECT_REPONAME"
+              git config --global user.name "$CIRCLE_USERNAME"
               git remote add wpe "git@git.wpengine.com:production/${WPE_INSTALL}.git"
               git fetch wpe
 

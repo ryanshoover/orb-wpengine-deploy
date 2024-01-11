@@ -23,29 +23,22 @@ steps:
 
     - restore_cache:
           keys:
-              - yarn-{{ .Environment.CACHE_VERSION }}-{{ checksum "yarn.lock" }}
-
-    - run:
-          name: Add Gemfury registry
-          command: npm config set @dxt:registry https://npm.fury.io/wpedxt/
-    - run:
-          name: Add authentication to Gemfury
-          command: echo "//npm.fury.io/wpedxt/:_authToken=${FURY_AUTH}" > .npmrc
+              - npm-{{ .Environment.CACHE_VERSION }}-{{ checksum "package-lock.json" }}
     - run:
           name: Install node dependencies
           command: |
-              if [ -f yarn.lock ]; then
-                  yarn install --emoji false --non-interactive
+              if [ -f ${THEME_PATH}/package-lock.json ]; then
+                  npm --prefix $THEME_PATH install 
               fi
     - save_cache:
           paths:
               - ./node_modules
-          key: yarn-{{ .Environment.CACHE_VERSION }}-{{ checksum "yarn.lock" }}
+          key: npm-{{ .Environment.CACHE_VERSION }}-{{ checksum "package-lock.json" }}
     - run:
           name: Build compiled files
           command: |
-              if jq -e '.scripts.build' package.json; then
-                  yarn run build
+              if jq -e '.scripts.build' ${THEME_PATH}/package.json; then
+                  npm --prefix $THEME_PATH run build
               fi
 
     - persist_to_workspace:
